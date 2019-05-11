@@ -24,6 +24,7 @@ public class Ray {
         m_sign[0] = (m_direction[0] < 0.0) ? 1 : 0;
         m_sign[1] = (m_direction[0] < 0.0) ? 1 : 0;
         m_sign[2] = (m_direction[0] < 0.0) ? 1 : 0;
+        /* TODO */
     }
 
     /**
