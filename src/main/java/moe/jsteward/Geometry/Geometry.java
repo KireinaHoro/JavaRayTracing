@@ -1,6 +1,6 @@
 package moe.jsteward.Geometry;
 
-import java.util.Deque;
+import java.util.LinkedList;
 
 public class Geometry {
     /**
@@ -9,9 +9,9 @@ public class Geometry {
      * @author CloudLiu
      */
     protected
-    Deque<Vector3f> m_vertices;
-    Deque<Vector2f> m_textureCoordinates;
-    Deque<Triangle> m_triangles;
+    LinkedList<Vector3f> m_vertices;
+    LinkedList<Vector2f> m_textureCoordinates;
+    LinkedList<Triangle> m_triangles;
 
     /**
      * updates all triangles in moe.jsteward.Geometry.Geometry.
@@ -24,14 +24,14 @@ public class Geometry {
     /**
      * gets the vertices.
      */
-    public Deque<Vector3f> getVertices() {
+    public LinkedList<Vector3f> getVertices() {
         return m_vertices;
     }
 
     /**
      * gets the triangles.
      */
-    public Deque<Triangle> getTriangles() {
+    public LinkedList<Triangle> getTriangles() {
         return m_triangles;
     }
 
