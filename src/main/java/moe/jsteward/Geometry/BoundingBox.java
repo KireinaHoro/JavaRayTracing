@@ -14,7 +14,7 @@ public class BoundingBox {
      *  Initializes the bounding box from the provided geometry.
      *  \param1	geometry :=  The geometry.
      */
-    public BoundingBox(Geometry geometry) {
+    public BoundingBox(final Geometry geometry) {
         set(geometry);
     }
 
@@ -23,7 +23,7 @@ public class BoundingBox {
      *  \param1	minVertex :=  The smallest coordinates on X, Y, Z axes.
      *  \param2	maxVertex :=  The highest coordinates on X, Y, Z axes.
      */
-    public BoundingBox(Vector3D minVertex, Vector3D maxVertex) {
+    public BoundingBox(final Vector3D minVertex, final Vector3D maxVertex) {
         m_bounds[0] = minVertex;
         m_bounds[1] = maxVertex;
     }
@@ -32,7 +32,7 @@ public class BoundingBox {
      *  Constructor.
      *  \param1	minVertex :=  The smallest coordinates on X, Y, Z axes.
      */
-    public BoundingBox(Vector3D minVertex) {
+    public BoundingBox(final Vector3D minVertex) {
         m_bounds[0] = minVertex;
         m_bounds[1] = new Vector3D(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
     }
@@ -60,7 +60,7 @@ public class BoundingBox {
      *  Sets the bouding box with the given geometry.
      *  \param1	geometry	The geometry.
      */
-    public void set(Geometry geometry) {
+    public void set(final Geometry geometry) {
         Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
         m_bounds[0] = vertices.getFirst();
         m_bounds[1] = vertices.getFirst();
@@ -85,7 +85,7 @@ public class BoundingBox {
      *  Updates the bounding box with the given geometry.
      *  \param1	geometry :=  The geometry.
      */
-    public void update(Geometry geometry) {
+    public void update(final Geometry geometry) {
         Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
         Iterator<Vector3D> iter = vertices.iterator();
         while (iter.hasNext()) {
@@ -99,7 +99,7 @@ public class BoundingBox {
      *  Updates the bounding box with the provided triangle.
      *  \param1 triangle
      */
-    public void update(Triangle triangle) {
+    public void update(final Triangle triangle) {
         update(triangle.vertex(0));
         update(triangle.vertex(1));
         update(triangle.vertex(2));
@@ -109,7 +109,7 @@ public class BoundingBox {
      *  Updates the bounding box with the provided point.
      *  \param1 Vector3D
      */
-    public void update(Vector3D V) {
+    public void update(final Vector3D V) {
         m_bounds[0] = vectormin(m_bounds[0], V);
         m_bounds[1] = vectormax(m_bounds[1], V);
     }
@@ -118,7 +118,7 @@ public class BoundingBox {
      *  Updates this bounding box to bound the given boundingBox.
      *  \param1	boundingBox
      */
-    public void update(BoundingBox boundingBox) {
+    public void update(final BoundingBox boundingBox) {
         m_bounds[0] = vectormin(m_bounds[0], boundingBox.m_bounds[0]);
         m_bounds[1] = vectormax(m_bounds[1], boundingBox.m_bounds[1]);
     }
@@ -136,7 +136,7 @@ public class BoundingBox {
      *  \param e[0] = entryT , e[1] = exitT
      *  \return	true if an intersection is found, false otherwise.
      */
-    public boolean intersect(Ray ray, double t0, double t1, double e[]) {
+    public boolean intersect(final Ray ray, double t0, double t1, double e[]) {
 
         int sign[] = ray.getSign();
         Vector3D tmin = new Vector3D(m_bounds[sign[0]].getX(), m_bounds[sign[1]].getY(), m_bounds[sign[2]].getZ());
