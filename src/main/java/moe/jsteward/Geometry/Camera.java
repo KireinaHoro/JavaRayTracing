@@ -66,7 +66,7 @@ public class Camera {
     /*
      *  Constructor for Camera
      */
-    public Camera(Vector3D position, Vector3D target, double planeDistance, double planeWidth, double planeHeight) {
+    public Camera(final Vector3D position, final Vector3D target, double planeDistance, double planeWidth, double planeHeight) {
         m_position = new Vector3D(position.toArray());
         m_target = new Vector3D(target.toArray());
         m_planeDistance = planeDistance;
@@ -78,7 +78,7 @@ public class Camera {
     /*
      *  Constructor for Camera
      */
-    public Camera(Vector3D position, Vector3D target, double planeDistance, double planeWidth) {
+    public Camera(final Vector3D position, final Vector3D target, double planeDistance, double planeWidth) {
         m_position = new Vector3D(position.toArray());
         m_target = new Vector3D(target.toArray());
         m_planeDistance = planeDistance;
@@ -90,7 +90,7 @@ public class Camera {
     /*
      *  Constructor for Camera
      */
-    public Camera(Vector3D position, Vector3D target, double planeDistance) {
+    public Camera(final Vector3D position, final Vector3D target, double planeDistance) {
         m_position = new Vector3D(position.toArray());
         m_target = new Vector3D(target.toArray());
         m_planeDistance = planeDistance;
@@ -102,7 +102,7 @@ public class Camera {
     /*
      *  Constructor for Camera
      */
-    public Camera(Vector3D position, Vector3D target) {
+    public Camera(final Vector3D position, final Vector3D target) {
         m_position = new Vector3D(position.toArray());
         m_target = new Vector3D(target.toArray());
         m_planeDistance = 1.0;
@@ -114,7 +114,7 @@ public class Camera {
     /*
      *  Constructor for Camera
      */
-    public Camera(Vector3D position) {
+    public Camera(final Vector3D position) {
         m_position = new Vector3D(position.toArray());
         m_target = new Vector3D(0.0, 1.0, 0.0);
         m_planeDistance = 1.0;
@@ -139,7 +139,7 @@ public class Camera {
      *  Translates the camera in local coordinates (X = right, Y = front, Z=up).
      *  \param1 translation := The translation vector.
      */
-    public void translateLocal(Vector3D translation) {
+    public void translateLocal(final Vector3D translation) {
         Vector3D trans = m_right.scalarMultiply(translation.getX()).add(m_front.scalarMultiply(translation.getY())).subtract(m_down.scalarMultiply(translation.getZ()));
         m_position = m_position.add(trans);
         m_target = m_target.add(trans);
@@ -150,7 +150,7 @@ public class Camera {
      *  Sets the camera position position.
      *  \param1	position :=  The new camera position.
      */
-    public void setPosition(Vector3D position) {
+    public void setPosition(final Vector3D position) {
         m_position = position;
         computeParameters();
     }
@@ -159,7 +159,7 @@ public class Camera {
      *  Sets the target.
      *  \param1	target :=  The new target.
      */
-    void setTarget(Vector3D target) {
+    void setTarget(final Vector3D target) {
         m_target = target;
         computeParameters();
     }
