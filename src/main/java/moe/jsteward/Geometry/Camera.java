@@ -61,7 +61,6 @@ public class Camera {
         m_upLeftPoint = m_position.add(m_front.scalarMultiply(m_planeDistance))
                 .subtract(m_widthVector.scalarMultiply(0.5))
                 .subtract(m_heightVector.scalarMultiply(0.5));
-
     }
 
     /*
@@ -73,6 +72,66 @@ public class Camera {
         m_planeDistance = planeDistance;
         m_planeWidth = planeWidth;
         m_planeHeight = planeHeight;
+        computeParameters();
+    }
+
+    /*
+     *  Constructor for Camera
+     */
+    public Camera(Vector3D position, Vector3D target, double planeDistance, double planeWidth) {
+        m_position = new Vector3D(position.toArray());
+        m_target = new Vector3D(target.toArray());
+        m_planeDistance = planeDistance;
+        m_planeWidth = planeWidth;
+        m_planeHeight = 1.0;
+        computeParameters();
+    }
+
+    /*
+     *  Constructor for Camera
+     */
+    public Camera(Vector3D position, Vector3D target, double planeDistance) {
+        m_position = new Vector3D(position.toArray());
+        m_target = new Vector3D(target.toArray());
+        m_planeDistance = planeDistance;
+        m_planeWidth = 1.0;
+        m_planeHeight = 1.0;
+        computeParameters();
+    }
+
+    /*
+     *  Constructor for Camera
+     */
+    public Camera(Vector3D position, Vector3D target) {
+        m_position = new Vector3D(position.toArray());
+        m_target = new Vector3D(target.toArray());
+        m_planeDistance = 1.0;
+        m_planeWidth = 1.0;
+        m_planeHeight = 1.0;
+        computeParameters();
+    }
+
+    /*
+     *  Constructor for Camera
+     */
+    public Camera(Vector3D position) {
+        m_position = new Vector3D(position.toArray());
+        m_target = new Vector3D(0.0, 1.0, 0.0);
+        m_planeDistance = 1.0;
+        m_planeWidth = 1.0;
+        m_planeHeight = 1.0;
+        computeParameters();
+    }
+
+    /*
+     *  Constructor for Camera
+     */
+    public Camera() {
+        m_position = new Vector3D(0.0, 0.0, 0.0);
+        m_target = new Vector3D(0.0, 1.0, 0.0);
+        m_planeDistance = 1.0;
+        m_planeWidth = 1.0;
+        m_planeHeight = 1.0;
         computeParameters();
     }
 
