@@ -182,8 +182,7 @@ public class Triangle {
      */
     RGBColor sampleTexture(double u, double v) {
         if (m_material.hasTexture() && flagtexture) {
-            RGBColor texel = m_material.getTexture().pixel(interpolateTextureCoordinate(u, v));
-            return texel;
+            return m_material.getTexture().pixel(interpolateTextureCoordinate(u, v));
         }
         return new RGBColor(1.0, 1.0, 1.0);
     }
@@ -199,7 +198,11 @@ public class Triangle {
      *  Samples the normal given the u,v coordinates of an intersection. The normal is oriented toward the 'toward' point.
      */
     public Vector3D sampleNormal(double u, double v, final Vector3D toward) {
-
+        Vector3D result = m_vertexNormal[0].scalarMultiply(1 - u - v).add(m_vertexNormal[1].scalarMultiply(u)).add(m_vertexNormal[2].scalarMultiply(v)).normalize();
+        if ((toward.subtract(m_vertex0.add(m_uAxis.scalarMultiply(u)).add(m_vAxis.scalarMultiply(v)))).dotProduct(result) < 0.0) {
+            return result.scalarMultiply(-1.0).normalize();
+        }
+        return result.normalize();
     }
 
     /*
@@ -227,29 +230,36 @@ public class Triangle {
      *  Gets the normal directed toward the half space containing the provided point.
      */
     public Vector3D normal(final Vector3D point) {
-
+        if (point.subtract(m_vertex0).dotProduct(m_normal) < 0.0) {
+            return m_normal.scalarMultiply(-1.0);
+        }
+        return m_normal;
     }
 
     /*
      *  Returns the direction of a reflected ray, from a surface normal and the direction of the incident ray.
      */
     public static Vector3D reflectionDirection(final Vector3D n, final Vector3D dir) {
-
-
+        return new Vector3D(dir.subtract(n.scalarMultiply(2.0 * dir.dotProduct(n))).toArray());
     }
 
     /*
      *  Returns the direction of a reflected ray, from the direction of the incident ray.
      */
     public Vector3D reflectionDirection(final Vector3D dir) {
-
+        Vector3D n = normal();
+        return new Vector3D(dir.subtract(n.scalarMultiply(2.0 * dir.dotProduct(n))).toArray());
     }
 
     /*
      *  Returns the direction of the reflected ray from a ray description.
      */
     public Vector3D reflectionDirection(final Ray ray) {
-
+        Vector3D n = normal();
+        if (n.dotProduct(ray.source().subtract(m_vertex0)) <= 0.0) {
+            n = n.scalarMultiply(-1.0);
+        }
+        return new Vector3D(ray.direction().subtract(n.scalarMultiply(2.0 * ray.direction().dotProduct(n))).toArray());
     }
 
     /*
@@ -257,7 +267,46 @@ public class Triangle {
      *  tuv[0] = t, tuv[1] = u, tuv[2] = v;
      */
     public boolean intersection(final Ray r, double tuv[]) {
+        /* find vectors for two edges sharing vert0 */
+        final Vector3D edge1 = new Vector3D(uAxis().toArray());
+        final Vector3D edge2 = new Vector3D(vAxis().toArray());
 
+        /* begin calculating determinant - also used to calculate U parameter */
+        Vector3D pvec = new Vector3D(r.direction().crossProduct(edge2));
+
+        /* if determinant is near zero, ray lies in plane of triangle */
+        double det = edge1.dotProduct(pvec);
+
+        if (det > -0.000000001 && det < 0.000000001) {
+            return false;
+        }
+
+        double inv_det = 1.0 / det;
+
+        /* calculate distance from vert0 to ray origin */
+        //Math::Vector3 tvec(r.source() - vertex(0));
+        Vector3D tvec = new Vector3D(r.source().subtract(m_vertex0).toArray());
+
+        /* calculate U parameter and test bounds */
+        tuv[1] = tvec.dotProduct(pvec) * inv_det;
+
+        if (tuv[1] < 0.0 || tuv[1] > 1.0) {
+            return false;
+        }
+
+        /* prepare to test V parameter */
+        Vector3D qvec = new Vector3D(tvec.crossProduct(edge1).toArray());
+
+        /* calculate V parameter and test bounds */
+        tuv[2] = (r.direction().dotProduct(qvec)) * inv_det;
+        if (tuv[2] < 0.0 || tuv[1] + tuv[2] > 1.0) {
+            return false;
+        }
+
+        /* calculate t, ray intersects triangle */
+        tuv[0] = (edge2.dotProduct(qvec)) * inv_det;
+
+        return tuv[0] >= 0.0001;
     }
 
     /*
@@ -265,49 +314,98 @@ public class Triangle {
      *  tuv[0] = t, tuv[1] = u, tuv[2] = v;
      */
     public boolean generalIntersection(final Ray r, double tuv[]) {
+        /* find vectors for two edges sharing vert0 */
+        final Vector3D edge1 = new Vector3D(uAxis().toArray());
+        final Vector3D edge2 = new Vector3D(vAxis().toArray());
 
+        /* begin calculating determinant - also used to calculate U parameter */
+        Vector3D pvec = new Vector3D(r.direction().crossProduct(edge2));
+
+        /* if determinant is near zero, ray lies in plane of triangle */
+        double det = edge1.dotProduct(pvec);
+
+        if (det > -0.000001 && det < 0.000001) {
+            return false;
+        }
+
+        double inv_det = 1.0 / det;
+
+        /* calculate distance from vert0 to ray origin */
+        //Math::Vector3 tvec(r.source() - vertex(0));
+        Vector3D tvec = new Vector3D(r.source().subtract(m_vertex0).toArray());
+
+        /* calculate U parameter and test bounds */
+        tuv[1] = tvec.dotProduct(pvec) * inv_det;
+
+        /* prepare to test V parameter */
+        Vector3D qvec = new Vector3D(tvec.crossProduct(edge1).toArray());
+
+        /* calculate V parameter and test bounds */
+        tuv[2] = (r.direction().dotProduct(qvec)) * inv_det;
+
+        /* calculate t, ray intersects triangle */
+        tuv[0] = (edge2.dotProduct(qvec)) * inv_det;
+
+        return true;
     }
 
     /*
      *  Returns the surface of the triangle
      */
     public double surface() {
-
+        return (m_uAxis.crossProduct(m_vAxis)).getNorm() / 2.0;
     }
 
     /*
      *  Computes random barycentric coordinates
      */
     public Vector3D randomBarycentric() {
-
+        double r = Math.random();
+        double s = Math.random();
+        double a = 1.0 - Math.sqrt(s);
+        double b = ((1.0 - r) * Math.sqrt(s));
+        double c = r * Math.sqrt(s);
+        return new Vector3D(a, b, c);
     }
 
     /*
      *  Computes a point on a triangle from the barycentric coordinates
      */
     public Vector3D pointFromBraycentric(final Vector3D barycentric) {
-
+        Vector3D tmp = randomBarycentric();
+        return (m_vertex[0].scalarMultiply(tmp.getX()).add(m_vertex[1].scalarMultiply(tmp.getY())).add(m_vertex[2].scalarMultiply(tmp.getZ())));
     }
 
     /*
      *  Samples the texture from the provided barycentric coordinates
      */
     public RGBColor sampleTexture(final Vector3D barycentic) {
-
+        if (m_material.hasTexture()) {
+            Vector2D textureCoord = textureCoordinate(0).scalarMultiply(barycentic.getX()).
+                    add(textureCoordinate(1).scalarMultiply(barycentic.getY())).
+                    add(textureCoordinate(2).scalarMultiply(barycentic.getZ()));
+            return m_material.getTexture().pixel(textureCoord);
+        }
+        return RGBColor(1.0, 1.0, 1.0);
     }
 
     /*
      *  Computes a random point on the triangle
      */
     public Vector3D randomPoint() {
-
+        double r = Math.random();
+        double s = Math.random();
+        double a = 1.0 - Math.sqrt(s);
+        double b = ((1.0 - r) * Math.sqrt(s));
+        double c = r * Math.sqrt(s);
+        return (m_vertex[0].scalarMultiply(a).add(m_vertex[1].scalarMultiply(b)).add(m_vertex[2].scalarMultiply(c)));
     }
 
     /*
      *  Computes the distance between the point and the plane on which the triangle lies.
      */
     public double planeDistance(final Vector3D point) {
-
+        return Math.abs(point.subtract(m_vertex0).dotProduct(m_normal));
     }
 }
 
