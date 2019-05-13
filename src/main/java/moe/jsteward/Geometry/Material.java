@@ -8,7 +8,10 @@ public class Material {
     double    m_shininess ;
     RGBColor m_emissiveColor ;
     string m_textureFile;
-    Texture * m_texture;
+    Texture * m_texture;/* Pointer need todo */
+
+
+
     /*
      *  Constructor
      *  author Louis
