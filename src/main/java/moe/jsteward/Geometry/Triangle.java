@@ -1,5 +1,6 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.shape.TriangleMesh;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
@@ -66,6 +67,10 @@ public class Triangle {
         m_vertexNormal[0] = m_normal;
         m_vertexNormal[1] = m_normal;
         m_vertexNormal[2] = m_normal;
+    }
+
+    public Triangle(TriangleMesh triangleMesh) {
+        /* TODO triangle mesh */
     }
 
     /*
