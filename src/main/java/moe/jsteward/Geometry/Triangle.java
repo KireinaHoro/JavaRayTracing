@@ -1,5 +1,6 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.TriangleMesh;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -69,8 +70,42 @@ public class Triangle {
         m_vertexNormal[2] = m_normal;
     }
 
-    public Triangle(TriangleMesh triangleMesh) {
+    /*
+     *  Initializes a new instance of the "Triangle" class for TriangleMesh input.
+     */
+    public Triangle(TriangleMesh triangleMesh, Material material) {
         /* TODO triangle mesh */
+        float pointArray[] = new float[9];
+        float normalsArray[] = new float[9];
+        float coordinatesArray[] = new float[6];
+        triangleMesh.getPoints().toArray(pointArray);
+        triangleMesh.getNormals().toArray(normalsArray);
+        triangleMesh.getTexCoords().toArray(coordinatesArray);
+
+        Vector3D a = new Vector3D((double) pointArray[0], (double) pointArray[1], (double) pointArray[2]);
+        Vector3D b = new Vector3D((double) pointArray[3], (double) pointArray[4], (double) pointArray[5]);
+        Vector3D c = new Vector3D((double) pointArray[6], (double) pointArray[7], (double) pointArray[8]);
+
+        Vector2D ta = new Vector2D((double) coordinatesArray[0], (double) coordinatesArray[1]);
+        Vector2D tb = new Vector2D((double) coordinatesArray[2], (double) coordinatesArray[3]);
+        Vector2D tc = new Vector2D((double) coordinatesArray[4], (double) coordinatesArray[5]);
+
+        Vector3D na = new Vector3D((double) normalsArray[0], (double) normalsArray[1], (double) normalsArray[2]);
+        Vector3D nb = new Vector3D((double) normalsArray[3], (double) normalsArray[4], (double) normalsArray[5]);
+        Vector3D nc = new Vector3D((double) normalsArray[6], (double) normalsArray[7], (double) normalsArray[8]);
+
+        m_vertex[0] = a;
+        m_vertex[1] = b;
+        m_vertex[2] = c;
+        m_textureCoordinates[0] = ta;
+        m_textureCoordinates[1] = tb;
+        m_textureCoordinates[2] = tc;
+        flagtexture = true;
+        m_material = material;
+        update();
+        m_vertexNormal[0] = na;
+        m_vertexNormal[1] = nb;
+        m_vertexNormal[2] = nc;
     }
 
     /*
@@ -185,11 +220,11 @@ public class Triangle {
     /*
      *  Samples the texture given the u,v coordinates of an intersection.
      */
-    RGBColor sampleTexture(double u, double v) {
+    Color sampleTexture(double u, double v) {
         if (m_material.hasTexture() && flagtexture) {
             return m_material.getTexture().pixel(interpolateTextureCoordinate(u, v));
         }
-        return new RGBColor(1.0, 1.0, 1.0);
+        return new Color(1.0, 1.0, 1.0, 0.0);
     }
 
     /*
@@ -384,14 +419,14 @@ public class Triangle {
     /*
      *  Samples the texture from the provided barycentric coordinates
      */
-    public RGBColor sampleTexture(final Vector3D barycentic) {
+    public Color sampleTexture(final Vector3D barycentic) {
         if (m_material.hasTexture()) {
             Vector2D textureCoord = textureCoordinate(0).scalarMultiply(barycentic.getX()).
                     add(textureCoordinate(1).scalarMultiply(barycentic.getY())).
                     add(textureCoordinate(2).scalarMultiply(barycentic.getZ()));
             return m_material.getTexture().pixel(textureCoord);
         }
-        return RGBColor(1.0, 1.0, 1.0);
+        return new Color(1.0, 1.0, 1.0, 0.0);
     }
 
     /*
