@@ -27,8 +27,8 @@ public class RayTriangleIntersection {
      */
     public RayTriangleIntersection(Triangle triangle, Ray ray) {
         m_triangle = triangle;
-        m_valid = triangle.intersectionValid(ray);
-        double[] Params = triangle.intersectionParams(ray);
+        double[] Params = new double[3];
+        m_valid = triangle.intersection(ray, Params);
         m_t = Params[0];
         m_u = Params[1];
         m_v = Params[2];
