@@ -2,10 +2,11 @@ package moe.jsteward.Geometry;
 
 import javafx.geometry.BoundingBox;
 import javafx.scene.PointLight;
-import moe.jsteward.Math.MyPair;
 
 import java.util.LinkedList;
 import java.util.Vector;
+
+import org.apache.commons.lang3.tuple.MutablePair;
 
 
 /**
@@ -14,7 +15,7 @@ import java.util.Vector;
 public class Scene {
     protected
     Visualizer m_visu;
-    LinkedList<MyPair<BoundingBox, Geometry>> m_geometries;
+    LinkedList<MutablePair<BoundingBox, Geometry>> m_geometries;
     Vector<PointLight> m_lights;
     Camera m_camera;
     BoundingBox m_sceneBoundingBox;

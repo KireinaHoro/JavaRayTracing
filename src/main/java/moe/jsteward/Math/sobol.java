@@ -11,8 +11,10 @@ public class sobol {
 
     /*
      *  calculate the sobol sequence
+     *
+     *  Cloud: I thought it should be a static method... TODO
      */
-    public double sample(long index, int dimension, long scramble) {
+    public static double sample(long index, int dimension, long scramble) {
 
         long result = scramble & ~-(1 << size);
         for (int i = dimension * size; index > 0; index >>= 1, ++i) {
