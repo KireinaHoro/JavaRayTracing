@@ -277,7 +277,7 @@ public class Triangle {
         final Vector3D edge2 = new Vector3D(vAxis().toArray());
 
         /* begin calculating determinant - also used to calculate U parameter */
-        Vector3D pvec = new Vector3D(r.direction().crossProduct(edge2));
+        Vector3D pvec = r.direction().crossProduct(edge2);
 
         /* if determinant is near zero, ray lies in plane of triangle */
         double det = edge1.dotProduct(pvec);
@@ -324,7 +324,7 @@ public class Triangle {
         final Vector3D edge2 = new Vector3D(vAxis().toArray());
 
         /* begin calculating determinant - also used to calculate U parameter */
-        Vector3D pvec = new Vector3D(r.direction().crossProduct(edge2));
+        Vector3D pvec = r.direction().crossProduct(edge2);
 
         /* if determinant is near zero, ray lies in plane of triangle */
         double det = edge1.dotProduct(pvec);
