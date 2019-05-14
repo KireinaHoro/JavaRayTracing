@@ -33,7 +33,6 @@ public class RandomDirection {
      * random sampling of spherical coordinates, n = 1.0.
      */
     protected MutablePair<Double, Double> randomPolar() {
-        /* TODO */
         return randomPolar(1.0);
     }
 
