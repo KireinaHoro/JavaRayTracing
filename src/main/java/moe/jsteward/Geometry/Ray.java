@@ -1,13 +1,15 @@
 package moe.jsteward.Geometry;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 /**
  * a Ray with a source and direction.
  */
 public class Ray {
     protected
-    Vector3f m_source;
-    Vector3f m_direction;
-    Vector3f m_invDirection;
+    Vector3D m_source;
+    Vector3D m_direction;
+    Vector3D m_invDirection;
     int[] m_sign;
 
     /**
@@ -16,35 +18,35 @@ public class Ray {
      * @param source    source of the ray.
      * @param direction direction of the ray.
      */
-    public Ray(Vector3f source, Vector3f direction) {
+    public Ray(Vector3D source, Vector3D direction) {
         m_source = source;
-        m_direction = direction / direction.norm();
-        m_invDirection = Vector3f.makeVector(1.0f / m_direction[0], 1.0f / m_direction[1], 1.0f / m_direction[2]);
+        m_direction = direction.normalize();
+        m_invDirection = new Vector3D(1.0f / m_direction.getX(), 1.0f / m_direction.getY(), 1.0f / m_direction.getZ());
         m_sign = new int[3];
-        m_sign[0] = (m_direction[0] < 0.0) ? 1 : 0;
-        m_sign[1] = (m_direction[0] < 0.0) ? 1 : 0;
-        m_sign[2] = (m_direction[0] < 0.0) ? 1 : 0;
+        m_sign[0] = (m_direction.getX() < 0.0) ? 1 : 0;
+        m_sign[1] = (m_direction.getY() < 0.0) ? 1 : 0;
+        m_sign[2] = (m_direction.getZ() < 0.0) ? 1 : 0;
         /* TODO */
     }
 
     /**
      * gets the source.
      */
-    Vector3f source() {
+    Vector3D source() {
         return m_source;
     }
 
     /**
      * gets the direction.
      */
-    Vector3f direction() {
+    Vector3D direction() {
         return m_direction;
     }
 
     /**
      * gets the invDirection.
      */
-    Vector3f invDirection() {
+    Vector3D invDirection() {
         return m_invDirection;
     }
 
@@ -55,9 +57,11 @@ public class Ray {
      * @param delta add factor.
      * @return the multi factor t.
      */
-    public double project(Vector3f point, Vector3f delta) {
-        /* TODO */
-        return 1.0;
+    public double project(Vector3D point, Vector3D delta) {
+        /* TODO return type to be informed*/
+        double t = (point.subtract(source())).dotProduct(direction());
+        delta = (point.subtract(source())).subtract(direction().scalarMultiply(t));
+        return t;
     }
 
     /**

@@ -1,6 +1,6 @@
 package moe.jsteward.Geometry;
 
-import java.math.BigInteger;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 /**
  * an intersection between a ray and a triangle.
@@ -27,8 +27,8 @@ public class RayTriangleIntersection {
      */
     public RayTriangleIntersection(Triangle triangle, Ray ray) {
         m_triangle = triangle;
-        m_valid = triangle -> intersectionValid(ray);
-        double[] Params = triangle -> intersectionParams(ray);
+        m_valid = triangle.intersectionValid(ray);
+        double[] Params = triangle.intersectionParams(ray);
         m_t = Params[0];
         m_u = Params[1];
         m_v = Params[2];
@@ -82,8 +82,8 @@ public class RayTriangleIntersection {
     /**
      * returns intersection point.
      */
-    public Vector3f intersection() {
-        return m_triangle -> samplePoint(m_u, m_v);
+    public Vector3D intersection() {
+        return m_triangle.samplePoint(m_u, m_v);
     }
 
     /**

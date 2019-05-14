@@ -1,8 +1,9 @@
 package moe.jsteward.Math;
 
-import moe.jsteward.Math.MyPair;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.math3.complex.Quaternion;
 
-import java.math.*;
 
 /**
  * random direction sampling. Biased by a cosine distribution,
@@ -18,17 +19,22 @@ public class RandomDirection {
      *
      * @param n the shininess (1.0 if diffuse)
      */
-    protected MyPair<Double, Double> randomPolar(double n) {
-        /* TODO */
-        return new MyPair<Double, Double>();
+    protected MutablePair<Double, Double> randomPolar(double n) {
+        double rand1 = sobol.sample(m_index, 0, m_scramble);
+        double p = Math.pow(rand1, 1 / (n + 1));
+        double theta = Math.acos(p);
+        double rand2 = sobol.sample(m_index, 1, m_scramble);
+        double phy = 2 * Math.PI * rand2;
+        m_index++;
+        return new MutablePair<Double, Double>(theta, phy);
     }
 
     /**
      * random sampling of spherical coordinates, n = 1.0.
      */
-    protected MyPair<Double, Double> randomPolar() {
+    protected MutablePair<Double, Double> randomPolar() {
         /* TODO */
-        return new MyPair<Double, Double>();
+        return randomPolar(1.0);
     }
 
     /**
@@ -38,8 +44,8 @@ public class RandomDirection {
      * @param phy   coord two
      * @return created vector
      */
-    protected Vector3f getVector(double theta, double phy) {
-        return Vector3f.makeVector(Math.sin(theta) * Math.cos(phy),
+    protected Vector3D getVector(double theta, double phy) {
+        return new Vector3D(Math.sin(theta) * Math.cos(phy),
                 Math.sin(theta) * Math.sin(phy), Math.cos(theta));
     }
 
@@ -64,8 +70,8 @@ public class RandomDirection {
     }
 
     protected
-    Vector3f m_direction;
-    Vector3f m_directionNormal;
+    Vector3D m_direction;
+    Vector3D m_directionNormal;
     double m_n;
 
     /**
@@ -74,19 +80,29 @@ public class RandomDirection {
      * @param direction main direction for random sampling.
      * @param n         shininess of surface.
      */
-    public RandomDirection(Vector3f direction, double n) {
-        m_direction = new Vector3f(direction.normalized());
+    public RandomDirection(Vector3D direction, double n) {
+        m_direction = direction.normalize();
         m_n = n;
         m_scramble = 0;
         m_index = (int) (Math.random() * Integer.MAX_VALUE);
 
-        /* TODO */
+        m_directionNormal = new Vector3D(1.0, 0.0, 0.0);
+        m_directionNormal = m_directionNormal.subtract(m_direction.scalarMultiply(m_direction.dotProduct(m_directionNormal)));
+        if (m_directionNormal.getNorm() < 10.0 * Double.MIN_VALUE) {
+            m_directionNormal = new Vector3D(0.0, 1.0, 0.0);
+            m_directionNormal = m_directionNormal.subtract(m_direction.scalarMultiply(m_direction.dotProduct(m_directionNormal)));
+            if (m_directionNormal.getNorm() < 10.0 * Double.MIN_VALUE) {
+                m_directionNormal = new Vector3D(0.0, 0.0, 1.0);
+                m_directionNormal = m_directionNormal.subtract(m_direction.scalarMultiply(m_direction.dotProduct(m_directionNormal)));
+            }
+        }
+        m_directionNormal = m_directionNormal.normalize();
     }
 
     /**
      * Constructor, n = 1.0.
      */
-    public RandomDirection(Vector3f direction) {
+    public RandomDirection(Vector3D direction) {
         this(direction, 1.0);
     }
 
@@ -96,9 +112,12 @@ public class RandomDirection {
      *
      * @return the random direction.
      */
-    Vector3f generate() {
+    Vector3D generate() {
+        MutablePair<Double, Double> perturbation = randomPolar(m_n);
+        Quaternion q1 = new Quaternion(m_directionNormal.getX(), m_directionNormal.getY(), m_directionNormal.getZ(), perturbation.left);
+        Quaternion q2 = new Quaternion(m_direction.getX(), m_direction.getY(), m_direction.getZ(), perturbation.right);
         /* TODO */
-        return new Vector3f();
+        return Vector3D.ZERO;
     }
 
 

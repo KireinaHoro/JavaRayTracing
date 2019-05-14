@@ -2,15 +2,17 @@ package moe.jsteward.Geometry;
 
 import java.util.LinkedList;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.complex.Quaternion;
+
 public class Geometry {
     /**
      * A 3D geometry.
-     *
-     * @author CloudLiu
      */
     protected
-    LinkedList<Vector3f> m_vertices;
-    LinkedList<Vector2f> m_textureCoordinates;
+    LinkedList<Vector3D> m_vertices;
+    LinkedList<Vector2D> m_textureCoordinates;
     LinkedList<Triangle> m_triangles;
 
     /**
@@ -18,13 +20,15 @@ public class Geometry {
      * Should be called after some triangles are changed.
      */
     protected void updateTriangles() {
-        /* TODO */
+        for (Triangle triangle : m_triangles) {
+            triangle.update();
+        }
     }
 
     /**
      * gets the vertices.
      */
-    public LinkedList<Vector3f> getVertices() {
+    public LinkedList<Vector3D> getVertices() {
         return m_vertices;
     }
 
@@ -54,7 +58,7 @@ public class Geometry {
      * @param vertex the added vertex.
      * @return index of the added vertex.
      */
-    public int addVertex(Vector3f vertex) {
+    public int addVertex(Vector3D vertex) {
         m_vertices.addLast(vertex);
         return m_vertices.size() - 1;
     }
@@ -65,7 +69,7 @@ public class Geometry {
      * @param coord the added coord.
      * @return index of the added coord.
      */
-    public int addTextureCoordinates(Vector2f coord) {
+    public int addTextureCoordinates(Vector2D coord) {
         m_textureCoordinates.addLast(coord);
         return m_textureCoordinates.size() - 1;
     }
@@ -79,15 +83,22 @@ public class Geometry {
      * @param material the material.
      * @param normals  the normals.
      */
-    public void addTriangles(int i1, int i2, int i3, Material material, Vector3f normals) {
-        /* TODO */
+    public void addTriangle(int i1, int i2, int i3, Material material, Vector3D[] normals) {
+        if (m_textureCoordinates.isEmpty()) {
+            m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                    material, normals));
+        } else {
+            m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                    m_textureCoordinates.get(i1), m_textureCoordinates.get(i2), m_textureCoordinates.get(i3),
+                    material, normals));
+        }
     }
 
     /**
      * adds a triangle, normals = null.
      */
-    public void addTriangles(int i1, int i2, int i3, Material material) {
-        addTriangles(i1, i2, i3, material, null);
+    public void addTriangle(int i1, int i2, int i3, Material material) {
+        addTriangle(i1, i2, i3, material, null);
     }
 
     /**
@@ -102,8 +113,10 @@ public class Geometry {
      * @param material the material.
      * @param normals  the normals.
      */
-    public void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3, Material material, Vector3f normals) {
-        /* TODO */
+    public void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3, Material material, Vector3D[] normals) {
+        m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
+                material, normals));
     }
 
     /**
@@ -119,7 +132,10 @@ public class Geometry {
      * @param triangle the triangle.
      */
     public void addTriangle(Triangle triangle) {
-        /* TODO */
+        int i1 = addVertex(triangle.m_vertex[0]);
+        int i2 = addVertex(triangle.m_vertex[1]);
+        int i3 = addVertex(triangle.m_vertex[2]);
+        addTriangle(i1, i2, i3, triangle.material(), triangle.getVertexNormals());
     }
 
     /**
@@ -131,14 +147,17 @@ public class Geometry {
      * @param material the material.
      * @param normals  the normals.
      */
-    public void addTriangle(Vertor3f p0, Vertor3f p1, Vertor3f p2, Material material, Vector3f normals) {
-        /* TODO */
+    public void addTriangle(Vector3D p0, Vector3D p1, Vector3D p2, Material material, Vector3D[] normals) {
+        int i1 = addVertex(p0);
+        int i2 = addVertex(p1);
+        int i3 = addVertex(p2);
+        addTriangle(i1, i2, i3, material, normals);
     }
 
     /**
      * adds a triangle, with normals = null
      */
-    public void addTriangle(Vertor3f p0, Vertor3f p1, Vertor3f p2, Material material) {
+    public void addTriangle(Vector3D p0, Vector3D p1, Vector3D p2, Material material) {
         addTriangle(p0, p1, p2, material, null);
     }
 
@@ -167,7 +186,7 @@ public class Geometry {
      *
      * @param t the translation matrix.
      */
-    public void translate(Vector3f t) {
+    public void translate(Vector3D t) {
         /* TODO */
     }
 
