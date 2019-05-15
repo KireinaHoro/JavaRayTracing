@@ -1,12 +1,13 @@
 package moe.jsteward.Geometry;
 
-import javafx.geometry.BoundingBox;
-import javafx.scene.PointLight;
-
+import moe.jsteward.Geometry.BoundingBox;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
+import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.MutablePair;
+import sun.awt.image.ImageWatched;
 
 
 /**
@@ -15,7 +16,8 @@ import org.apache.commons.lang3.tuple.MutablePair;
 public class Scene {
     protected
     Visualizer m_visu;
-    LinkedList<MutablePair<BoundingBox, Geometry>> m_geometries;
+    List<MutablePair<BoundingBox, Geometry>> m_geometries
+            = new LinkedList<MutablePair<BoundingBox, Geometry>>();
     Vector<PointLight> m_lights;
     Camera m_camera;
     BoundingBox m_sceneBoundingBox;
@@ -74,14 +76,22 @@ public class Scene {
      * adds a geometry to this Scene.
      */
     public void add(Geometry geometry) {
-        /* TODO */
+        if (geometry.getVertices().isEmpty()) return;
+        BoundingBox box = new BoundingBox(geometry);
+        m_geometries.addLast(new MutablePair<BoundingBox, Geometry>(box, geometry));
+        m_geometries.get(m_geometries.size() - 1).right.computeVertexNormals(Math.PI / 8.0);
+        if (m_geometries.size() == 1) {
+            m_sceneBoundingBox = box;
+        } else {
+            m_sceneBoundingBox.update(box);
+        }
     }
 
     /**
      * adds a point light to this Scene.
      */
     public void add(PointLight light) {
-        /* TODO */
+        m_lights.addLast(light);
     }
 
     /**
@@ -92,10 +102,10 @@ public class Scene {
     }
 
     /**
-     * sends a ray in this Scene, returns the computed RGBColor.
+     * sends a ray in this Scene, returns the computed Color.
      */
-    RGBColor sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
-        return new RGBColor();
+    Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
+        return new Color(0, 0, 0, 1);
         /* TODO */
     }
 
