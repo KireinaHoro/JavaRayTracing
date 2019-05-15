@@ -62,7 +62,7 @@ public class Geometry {
      * @return index of the added vertex.
      */
     public int addVertex(Vector3D vertex) {
-        m_vertices.addLast(vertex);
+        m_vertices.add(vertex);
         return m_vertices.size() - 1;
     }
 
@@ -73,7 +73,7 @@ public class Geometry {
      * @return index of the added coord.
      */
     public int addTextureCoordinates(Vector2D coord) {
-        m_textureCoordinates.addLast(coord);
+        m_textureCoordinates.add(coord);
         return m_textureCoordinates.size() - 1;
     }
 
@@ -88,10 +88,10 @@ public class Geometry {
      */
     public void addTriangle(int i1, int i2, int i3, Material material, Vector3D[] normals) {
         if (m_textureCoordinates.isEmpty()) {
-            m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+            m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
                     material, normals));
         } else {
-            m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+            m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
                     m_textureCoordinates.get(i1), m_textureCoordinates.get(i2), m_textureCoordinates.get(i3),
                     material, normals));
         }
@@ -117,7 +117,7 @@ public class Geometry {
      * @param normals  the normals.
      */
     public void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3, Material material, Vector3D[] normals) {
-        m_triangles.addLast(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+        m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
                 m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
                 material, normals));
     }
@@ -291,7 +291,7 @@ public class Geometry {
         double cosAngleLimit = Math.cos(angle);
         List<Triangle> triangles = new LinkedList<Triangle>();
         for (Triangle triangle : m_triangles) {
-            triangles.addLast(triangle);
+            triangles.add(triangle);
         }
         ComputeVertexNormals normalsComputation (triangles);
         normalsComputation.compute(cosAngleLimit);
