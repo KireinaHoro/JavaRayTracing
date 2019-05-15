@@ -1,7 +1,9 @@
 package moe.jsteward.Geometry;
 
 import java.util.LinkedList;
-
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.complex.Quaternion;
@@ -11,9 +13,9 @@ public class Geometry {
      * A 3D geometry.
      */
     protected
-    LinkedList<Vector3D> m_vertices;
-    LinkedList<Vector2D> m_textureCoordinates;
-    LinkedList<Triangle> m_triangles;
+    List<Vector3D> m_vertices = new LinkedList<Vector3D>();
+    List<Vector2D> m_textureCoordinates = new LinkedList<Vector2D>();
+    List<Triangle> m_triangles = new LinkedList<Triangle>();
 
     /**
      * updates all triangles in moe.jsteward.Geometry.Geometry.
@@ -28,14 +30,14 @@ public class Geometry {
     /**
      * gets the vertices.
      */
-    public LinkedList<Vector3D> getVertices() {
+    public List<Vector3D> getVertices() {
         return m_vertices;
     }
 
     /**
      * gets the triangles.
      */
-    public LinkedList<Triangle> getTriangles() {
+    public List<Triangle> getTriangles() {
         return m_triangles;
     }
 
@@ -167,19 +169,48 @@ public class Geometry {
      * @param geometry the given moe.jsteward.Geometry.Geometry.
      */
     public void merge(Geometry geometry) {
-        /* TODO */
+        Map<Vector3D, Integer> vertex2ind = new HashMap<Vector3D, Integer>();
+        for (Vector3D vec : geometry.getVertices()) {
+            if (!vertex2ind.containsKey(vec)) {
+                vertex2ind.put(vec, addVertex(vec));
+            }
+        }
+        Map<Vector2D, Integer> texture2ind = new HashMap<Vector2D, Integer>();
+        for (Vector2D texCoord : geometry.m_textureCoordinates) {
+            if (!texture2ind.containsKey(texCoord)) {
+                texture2ind.put(texCoord, addTextureCoordinates(texCoord));
+            }
+        }
+        for (Triangle triangle : geometry.m_triangles) {
+            int i1 = vertex2ind.get(triangle.vertex(0));
+            int i2 = vertex2ind.get(triangle.vertex(1));
+            int i3 = vertex2ind.get(triangle.vertex(2));
+            if (texture2ind.containsKey(triangle.textureCoordinate(0))) {
+                addTriangle(i1, i2, i3,
+                        texture2ind.get(triangle.textureCoordinate(0)),
+                        texture2ind.get(triangle.textureCoordinate(1)),
+                        texture2ind.get(triangle.textureCoordinate(2)),
+                        triangle.material(), triangle.getVertexNormals());
+                // TODO origin not have getVertexNormals()
+            } else {
+                addTriangle(i1, i2, i3,
+                        triangle.material(), triangle.getVertexNormals());
+            }
+        }
     }
 
-    /**
+    /*
+    //
      * computes if given CastedRay intersects with this.
      *
      * @param ray the given CastedRay
      * @return true if intersects.
-     */
+     //
     public boolean intersection(CastedRay ray) {
-        /* TODO */
+        // TODO should I implement this one?
         return false;
     }
+    */
 
     /**
      * translates this with t.
@@ -187,7 +218,9 @@ public class Geometry {
      * @param t the translation matrix.
      */
     public void translate(Vector3D t) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = vec.add(t);
+        }
     }
 
     /**
@@ -196,7 +229,9 @@ public class Geometry {
      * @param v the scale factor.
      */
     public void scale(double v) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = vec.scalarMultiply(v);
+        }
     }
 
     /**
@@ -205,7 +240,9 @@ public class Geometry {
      * @param v the scale factor on X axis.
      */
     public void scaleX(double v) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = new Vector3D(v * vec.getX(), vec.getY(), vec.getZ());
+        }
     }
 
     /**
@@ -214,7 +251,9 @@ public class Geometry {
      * @param v the scale factor on Y axis.
      */
     public void scaleY(double v) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = new Vector3D(vec.getX(), v * vec.getY(), vec.getZ());
+        }
     }
 
     /**
@@ -223,7 +262,9 @@ public class Geometry {
      * @param v the scale factor on Z axis.
      */
     public void scaleZ(double v) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = new Vector3D(vec.getX(), vec.getY(), v * vec.getZ());
+        }
     }
 
     /**
@@ -232,15 +273,21 @@ public class Geometry {
      * @param q the rotation Quaternion.
      */
     public void rotate(Quaternion q) {
-        /* TODO */
+        for (Vector3D vec : m_vertices) {
+            vec = new Vector3D
+                    (q.multiply(new Quaternion(vec.toArray())).
+                            multiply(q.getConjugate()).getVectorPart());
+        }
     }
 
-    /**
+    /*
+    //
      * computes the per vertex normals.
      *
      * @param angle the angle limit for smoothing surface.
-     */
+     //
     public void computeVertexNormals(double angle) {
-        /* TODO */
+        // TODO should I implement this one?
     }
+    */
 }
