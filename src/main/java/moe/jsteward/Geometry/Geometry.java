@@ -1,5 +1,6 @@
 package moe.jsteward.Geometry;
 
+import moe.jsteward.Geometry.ComputeVertexNormals;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -280,14 +281,19 @@ public class Geometry {
         }
     }
 
-    /*
-    //
+    /**
      * computes the per vertex normals.
      *
      * @param angle the angle limit for smoothing surface.
-     //
+     */
     public void computeVertexNormals(double angle) {
-        // TODO should I implement this one?
+        // TODO
+        double cosAngleLimit = Math.cos(angle);
+        List<Triangle> triangles = new LinkedList<Triangle>();
+        for (Triangle triangle : m_triangles) {
+            triangles.addLast(triangle);
+        }
+        ComputeVertexNormals normalsComputation (triangles);
+        normalsComputation.compute(cosAngleLimit);
     }
-    */
 }
