@@ -32,7 +32,6 @@ public class RayTriangleIntersection {
         m_t = Params[0];
         m_u = Params[1];
         m_v = Params[2];
-        /* TODO intersection -> ~Valid & ~Params */
     }
 
     /**
