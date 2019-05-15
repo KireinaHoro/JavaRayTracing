@@ -115,8 +115,10 @@ public class RandomDirection {
         MutablePair<Double, Double> perturbation = randomPolar(m_n);
         Quaternion q1 = new Quaternion(m_directionNormal.getX(), m_directionNormal.getY(), m_directionNormal.getZ(), perturbation.left);
         Quaternion q2 = new Quaternion(m_direction.getX(), m_direction.getY(), m_direction.getZ(), perturbation.right);
-        /* TODO */
-        return Vector3D.ZERO;
+        // rotate : (this.multiply(q)).multiply(this.getConjugate())
+        q1 = (q1.multiply(new Quaternion(m_direction.toArray()))).multiply(q1.getConjugate());
+        q2 = (q2.multiply(q1)).multiply(q2.getConjugate());
+        return new Vector3D(q2.getVectorPart());
     }
 
 
