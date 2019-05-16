@@ -1,12 +1,12 @@
 package moe.jsteward.Geometry;
 
-import javafx.scene.image.PixelWriter;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.IntStream;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 
 /**

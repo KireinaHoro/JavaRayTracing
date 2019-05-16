@@ -1,11 +1,15 @@
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
 <GridPane fx:controller="moe.jsteward.RenderController"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
     <Label GridPane.rowIndex="0" fx:id="greetingLabel" text="Welcome to the Java Ray Tracer"/>
-    <Canvas GridPane.rowIndex="1" fx:id="canvas"/>
-    <Button GridPane.rowIndex="2" text="Choose Model File" onAction="#chooseModelFile"/>
-
+    <HBox spacing="10" alignment="BOTTOM_CENTER" GridPane.rowIndex="1">
+        <TextField fx:id="widthField" promptText="Width"/>
+        <TextField fx:id="heightField" promptText="Height"/>
+    </HBox>
+    <Canvas GridPane.rowIndex="2" fx:id="canvas"/>
+    <Button GridPane.rowIndex="3" text="Choose Model File" onAction="#chooseModelFile"/>
 </GridPane>
