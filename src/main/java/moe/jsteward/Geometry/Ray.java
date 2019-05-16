@@ -5,11 +5,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 /**
  * a Ray with a source and direction.
  */
-public class Ray {
-    private Vector3D m_source;
-    private Vector3D m_direction;
-    private Vector3D m_invDirection;
-    private int[] m_sign;
+class Ray {
+    private final Vector3D m_source;
+    private final Vector3D m_direction;
+    private final Vector3D m_invDirection;
+    private final int[] m_sign;
 
     /**
      * Constructor.
@@ -17,7 +17,7 @@ public class Ray {
      * @param source    source of the ray.
      * @param direction direction of the ray.
      */
-    public Ray(Vector3D source, Vector3D direction) {
+    Ray(Vector3D source, Vector3D direction) {
         m_source = source;
         m_direction = direction.normalize();
         m_invDirection = new Vector3D(1.0f / m_direction.getX(), 1.0f / m_direction.getY(), 1.0f / m_direction.getZ());

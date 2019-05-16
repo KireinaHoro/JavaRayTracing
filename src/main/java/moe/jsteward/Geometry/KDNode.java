@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 class KDNode {
-    private BoundingBox bbox;
+    private final BoundingBox bbox;
     private KDNode left;
     private KDNode right;
 

@@ -1,33 +1,18 @@
 package moe.jsteward.Math;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.complex.Quaternion;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 
 /**
  * random direction sampling. Biased by a cosine distribution,
  * useful for respecting a BRDF distribution (Diffuse or Specular).
  */
-public class RandomDirection {
-    protected
-    long m_scramble;
-    long m_index;
-
-    /**
-     * random sampling of spherical coordinates.
-     *
-     * @param n the shininess (1.0 if diffuse)
-     */
-    protected MutablePair<Double, Double> randomPolar(double n) {
-        double rand1 = sobol.sample(m_index, 0, m_scramble);
-        double p = Math.pow(rand1, 1 / (n + 1));
-        double theta = Math.acos(p);
-        double rand2 = sobol.sample(m_index, 1, m_scramble);
-        double phy = 2 * Math.PI * rand2;
-        m_index++;
-        return new MutablePair<Double, Double>(theta, phy);
-    }
+class RandomDirection {
+    private final long m_scramble;
+    private final Vector3D m_direction;
+    private final double m_n;
 
     /**
      * random sampling of spherical coordinates, n = 1.0.
@@ -48,15 +33,7 @@ public class RandomDirection {
                 Math.sin(theta) * Math.sin(phy), Math.cos(theta));
     }
 
-    /**
-     * a random value in [0,1)
-     *
-     * @return a random value in [0,1)
-     */
-    public static double random() {
-        /* TODO original [0, 1] */
-        return Math.random();
-    }
+    private long m_index;
 
     /**
      * a random value in [min, max)
@@ -68,18 +45,14 @@ public class RandomDirection {
         return value * (max - min) + min;
     }
 
-    protected
-    Vector3D m_direction;
-    Vector3D m_directionNormal;
-    double m_n;
-
+    private Vector3D m_directionNormal;
     /**
      * Constructor.
      *
      * @param direction main direction for random sampling.
      * @param n         shininess of surface.
      */
-    public RandomDirection(Vector3D direction, double n) {
+    private RandomDirection(Vector3D direction, double n) {
         m_direction = direction.normalize();
         m_n = n;
         m_scramble = 0;
@@ -96,6 +69,31 @@ public class RandomDirection {
             }
         }
         m_directionNormal = m_directionNormal.normalize();
+    }
+
+    /**
+     * a random value in [0,1)
+     *
+     * @return a random value in [0,1)
+     */
+    private static double random() {
+        /* TODO original [0, 1] */
+        return Math.random();
+    }
+
+    /**
+     * random sampling of spherical coordinates.
+     *
+     * @param n the shininess (1.0 if diffuse)
+     */
+    private MutablePair<Double, Double> randomPolar(double n) {
+        double rand1 = Sobol.sample(m_index, 0, m_scramble);
+        double p = Math.pow(rand1, 1 / (n + 1));
+        double theta = Math.acos(p);
+        double rand2 = Sobol.sample(m_index, 1, m_scramble);
+        double phy = 2 * Math.PI * rand2;
+        m_index++;
+        return new MutablePair<>(theta, phy);
     }
 
     /**

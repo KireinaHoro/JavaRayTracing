@@ -1,14 +1,14 @@
 package moe.jsteward.Geometry;
 
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 
 public class GeometryBuilder {
-    private Geometry instance = new Geometry();
+    private final Geometry instance = new Geometry();
 
-    public GeometryBuilder add(MeshView mesh) {
-        instance.m_triangles.add(new Triangle(mesh.getMesh(), new Material(mesh.getMaterial())));
+    public void add(MeshView mesh) {
+        instance.getTriangles().add(new Triangle((TriangleMesh) mesh.getMesh(), (PhongMaterialEx) mesh.getMaterial()));
 
-        return this;
     }
 
     public Geometry toGeometry() {

@@ -1,20 +1,20 @@
 package moe.jsteward.Math;
 
-public class sobol {
+class Sobol {
     /*
      *  What is the initial value?
      */
 
     static final int num_dimensions = 0;
-    static final int size = 0;
-    static final long matrices[] = {0};
+    private static final int size = 0;
+    private static final long[] matrices = {0};
 
     /*
-     *  calculate the sobol sequence
+     *  calculate the Sobol sequence
      *
      *  Cloud: I thought it should be a static method... TODO
      */
-    public static double sample(long index, int dimension, long scramble) {
+    static double sample(long index, int dimension, long scramble) {
 
         long result = scramble & ~-(1 << size);
         for (int i = dimension * size; index > 0; index >>= 1, ++i) {
@@ -26,7 +26,7 @@ public class sobol {
     }
 
     /*
-     *  calculate the sobol sequence
+     *  calculate the Sobol sequence
      */
     public double sample(long index, int dimension) {
         return sample(index, dimension, 0);

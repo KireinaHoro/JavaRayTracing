@@ -3,12 +3,11 @@ package moe.jsteward.Geometry;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 public class BoundingBox {
     //  The bounds (min / max vectors).
-    private Vector3D[] m_bounds = new Vector3D[2];
+    private final Vector3D[] m_bounds = new Vector3D[2];
 
     /*
      *  Initializes the bounding box from the provided geometry.
@@ -40,7 +39,7 @@ public class BoundingBox {
     /*
      *  Constructor.
      */
-    public BoundingBox() {
+    BoundingBox() {
         m_bounds[0] = new Vector3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         m_bounds[1] = new Vector3D(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
     }
@@ -61,7 +60,7 @@ public class BoundingBox {
      *  \param1	geometry	The geometry.
      */
     private void set(final Geometry geometry) {
-        Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
+        Deque<Vector3D> vertices = new LinkedList<>(geometry.getVertices());
         m_bounds[0] = vertices.getFirst();
         m_bounds[1] = vertices.getFirst();
         update(geometry);
@@ -86,10 +85,8 @@ public class BoundingBox {
      *  \param1	geometry :=  The geometry.
      */
     private void update(final Geometry geometry) {
-        Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
-        Iterator<Vector3D> iter = vertices.iterator();
-        while (iter.hasNext()) {
-            Vector3D theNext = iter.next();
+        Deque<Vector3D> vertices = new LinkedList<>(geometry.getVertices());
+        for (Vector3D theNext : vertices) {
             m_bounds[0] = vectormin(m_bounds[0], theNext);
             m_bounds[1] = vectormax(m_bounds[1], theNext);
         }
@@ -99,7 +96,7 @@ public class BoundingBox {
      *  Updates the bounding box with the provided triangle.
      *  \param1 triangle
      */
-    public void update(final Triangle triangle) {
+    void update(final Triangle triangle) {
         update(triangle.vertex(0));
         update(triangle.vertex(1));
         update(triangle.vertex(2));
@@ -136,7 +133,7 @@ public class BoundingBox {
      *  \param e[0] = entryT , e[1] = exitT
      *  \return	true if an intersection is found, false otherwise.
      */
-    public boolean intersect(final Ray ray, double t0, double t1, double e[]) {
+    boolean intersect(final Ray ray, double t0, double t1, double[] e) {
 
         int[] sign = ray.getSign();
         Vector3D tmin = new Vector3D(m_bounds[sign[0]].getX(), m_bounds[sign[1]].getY(), m_bounds[sign[2]].getZ());

@@ -17,7 +17,7 @@ public class Scene {
     private PixelWriter pw;
     private int imgYRange, imgXRange;
 
-    private List<MutablePair<BoundingBox, Geometry>> m_geometries
+    private final List<MutablePair<BoundingBox, Geometry>> m_geometries
             = new LinkedList<>();
     private List<PointLight> m_lights;
     private Camera m_camera;

@@ -5,11 +5,11 @@ import javafx.scene.shape.TriangleMesh;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-public class Triangle {
+class Triangle {
     // \brief	Pointers to the three vertices
-    Vector3D[] m_vertex = new Vector3D[3];
+    final Vector3D[] m_vertex = new Vector3D[3];
     // \brief Pointers to the texture coordinates
-    private Vector2D[] m_textureCoordinates = new Vector2D[3];
+    private final Vector2D[] m_textureCoordinates = new Vector2D[3];
     // \brief	The vertex 0 (added to enhance cache consistency)
     private Vector3D m_vertex0;
     // \brief	The u axis.
@@ -21,7 +21,7 @@ public class Triangle {
     // \brief	The associated material.
     private PhongMaterialEx m_material;
     // \brief	Per vertex normal.
-    private Vector3D[] m_vertexNormal = new Vector3D[3];
+    private final Vector3D[] m_vertexNormal = new Vector3D[3];
     // \brief   flag of having m_textureCoordinates
     /*
      *  Sets a vertex normal.
@@ -72,7 +72,7 @@ public class Triangle {
     /*
      *  Initializes a new instance of the "Triangle" class for TriangleMesh input.
      */
-    public Triangle(TriangleMesh triangleMesh, PhongMaterialEx material) {
+    Triangle(TriangleMesh triangleMesh, PhongMaterialEx material) {
         float[] pointArray = new float[9];
         float[] normalsArray = new float[9];
         float[] coordinatesArray = new float[6];
@@ -192,7 +192,7 @@ public class Triangle {
     /*
      *  Returns the center of this triangle.
      */
-    public Vector3D center() {
+    Vector3D center() {
         Vector3D ret = vertex(0).add(vertex(1)).add(vertex(2));
         return new Vector3D(ret.getX() / 3.0, ret.getY() / 3.0, ret.getZ() / 3.0);
     }
@@ -429,11 +429,10 @@ public class Triangle {
      *  Computes a random point on the triangle
      */
     public Vector3D randomPoint() {
-        double r = Math.random();
-        double s = Math.random();
-        double a = 1.0 - Math.sqrt(s);
-        double b = ((1.0 - r) * Math.sqrt(s));
-        double c = r * Math.sqrt(s);
+        Vector3D p = randomBarycentric();
+        double a = p.getX();
+        double b = p.getY();
+        double c = p.getZ();
         return (m_vertex[0].scalarMultiply(a).add(m_vertex[1].scalarMultiply(b)).add(m_vertex[2].scalarMultiply(c)));
     }
 

@@ -6,7 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class LightSampler {
+class LightSampler {
     private Vector<Double> surfaceSum;
     private Vector<Triangle> allTriangles;
     private double currentSum;

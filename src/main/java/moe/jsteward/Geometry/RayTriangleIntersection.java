@@ -5,7 +5,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 /**
  * an intersection between a ray and a triangle.
  */
-public class RayTriangleIntersection {
+class RayTriangleIntersection {
 
 
     /* distance between source and intersection **/
@@ -15,9 +15,9 @@ public class RayTriangleIntersection {
     /* v coord of intersection **/
     private double m_v;
     /* if intersection is valid **/
-    private boolean m_valid;
+    private final boolean m_valid;
     /* triangle associated to this intersection **/
-    private Triangle m_triangle;
+    private final Triangle m_triangle;
 
     /**
      * Constructor.

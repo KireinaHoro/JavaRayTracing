@@ -1,21 +1,20 @@
 package moe.jsteward.Geometry;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Vector;
+import com.sun.istack.internal.NotNull;
+import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.apache.commons.math3.complex.Quaternion;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Geometry {
+    private final List<Vector2D> m_textureCoordinates = new LinkedList<>();
+    private final List<Triangle> m_triangles = new LinkedList<>();
     /**
      * A 3D geometry.
      */
-    private List<Vector3D> m_vertices = new LinkedList<Vector3D>();
-    private List<Vector2D> m_textureCoordinates = new LinkedList<Vector2D>();
-    private List<Triangle> m_triangles = new LinkedList<Triangle>();
+    private List<Vector3D> m_vertices = new LinkedList<>();
 
     /**
      * updates all triangles in moe.jsteward.Geometry.Geometry.
@@ -30,7 +29,7 @@ public class Geometry {
     /**
      * gets the vertices.
      */
-    List<Vector3D> getVertices() {
+    public List<Vector3D> getVertices() {
         return m_vertices;
     }
 
@@ -45,13 +44,6 @@ public class Geometry {
      * default constructor.
      */
     Geometry() {
-    }
-
-    /**
-     * copy constructor.
-     */
-    public Geometry(Geometry geometry) {
-        merge(geometry);
     }
 
     /**
@@ -85,7 +77,7 @@ public class Geometry {
      * @param material the material.
      * @param normals  the normals.
      */
-    private void addTriangle(int i1, int i2, int i3, PhongMaterialEx material, Vector3D[] normals) {
+    private void addTriangle(int i1, int i2, int i3, PhongMaterialEx material, @NotNull Vector3D[] normals) {
         if (m_textureCoordinates.isEmpty()) {
             m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
                     material, normals));
@@ -115,7 +107,8 @@ public class Geometry {
      * @param material the material.
      * @param normals  the normals.
      */
-    private void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3, PhongMaterialEx material, Vector3D[] normals) {
+    private void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3,
+                             PhongMaterialEx material, @NotNull Vector3D[] normals) {
         m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
                 m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
                 material, normals));
@@ -169,13 +162,13 @@ public class Geometry {
      * @param geometry the given moe.jsteward.Geometry.Geometry.
      */
     void merge(Geometry geometry) {
-        Map<Vector3D, Integer> vertex2ind = new HashMap<Vector3D, Integer>();
+        Map<Vector3D, Integer> vertex2ind = new HashMap<>();
         for (Vector3D vec : geometry.getVertices()) {
             if (!vertex2ind.containsKey(vec)) {
                 vertex2ind.put(vec, addVertex(vec));
             }
         }
-        Map<Vector2D, Integer> texture2ind = new HashMap<Vector2D, Integer>();
+        Map<Vector2D, Integer> texture2ind = new HashMap<>();
         for (Vector2D texCoord : geometry.m_textureCoordinates) {
             if (!texture2ind.containsKey(texCoord)) {
                 texture2ind.put(texCoord, addTextureCoordinates(texCoord));
@@ -218,9 +211,9 @@ public class Geometry {
      * @param t the translation matrix.
      */
     void translate(Vector3D t) {
-        for (Vector3D vec : m_vertices) {
-            vec = vec.add(t);
-        }
+        m_vertices = m_vertices.stream()
+                .map(v -> v.add(t))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -287,7 +280,7 @@ public class Geometry {
      */
     public void computeVertexNormals(double angle) {
         double cosAngleLimit = Math.cos(angle);
-        Vector<Triangle> triangles = new Vector<Triangle>(m_triangles);
+        Vector<Triangle> triangles = new Vector<>(m_triangles);
         ComputeVertexNormals normalsComputation = new ComputeVertexNormals(triangles);
         normalsComputation.compute(cosAngleLimit);
     }

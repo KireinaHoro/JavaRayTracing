@@ -1,6 +1,5 @@
 package moe.jsteward.Geometry;
 
-import javafx.scene.paint.Color;
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -12,13 +11,13 @@ public class Camera {
     private Vector3D m_target;
 
     //  Distance of the focal plane.
-    private double m_planeDistance;
+    private final double m_planeDistance;
 
     //  Width of the projection rectangle.
-    private double m_planeWidth;
+    private final double m_planeWidth;
 
     //  Height of the projection rectangle.
-    private double m_planeHeight;
+    private final double m_planeHeight;
 
     //  The front vector of the camera.
     private Vector3D m_front;

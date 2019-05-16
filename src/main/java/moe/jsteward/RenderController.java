@@ -36,7 +36,6 @@ public class RenderController {
     public TextField heightField;
 
     private Scene scene;
-    private Timeline timeline;
     private WritableImage image;
 
     // max depth for ray bounces
@@ -154,10 +153,17 @@ public class RenderController {
                 }
 
             }
+
+            Alert aa = new Alert(AlertType.INFORMATION);
+            aa.setTitle("Rendering Complete");
+            aa.setHeaderText(null);
+            aa.setContentText("The rendering has completed successfully.  The program will now exit.");
+            aa.showAndWait();
+            System.exit(0);
         }).start();
 
         // update timeline
-        timeline = new Timeline();
+        Timeline timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(
                 new KeyFrame(Duration.millis(50),
