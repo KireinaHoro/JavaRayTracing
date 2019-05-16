@@ -1,5 +1,7 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.paint.Color;
+
 public class Material {
     protected
     Color m_ambientColor ;
@@ -7,8 +9,8 @@ public class Material {
     Color m_specularColor ;
     double    m_shininess ;
     Color m_emissiveColor ;
-    string m_textureFile;
-    Texture * m_texture;/* Pointer need todo */
+    String m_textureFile;
+    Texture  m_texture;/* Pointer need todo */
 
 
 
@@ -16,20 +18,20 @@ public class Material {
      *  Constructor
      *  author Louis
      */
-    public Material(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, string textureFile){
+    public Material(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, String textureFile){
         ambientColor = Color();
         diffuseColor = Color();
         specularColor = Color();
         shininess = 1.0;
         emissiveColor = Color();
-        textureFile = NULL;
+        textureFile = "";
         m_ambientColor = ambientColor;
         m_diffuseColor = diffuseColor;
         m_specularColor = specularColor;
         m_shininess = shininess;
         m_emissiveColor = emissiveColor;
         m_textureFile = textureFile;
-        m_texture = "";
+        m_texture = null;
     }
 
     /*
@@ -104,17 +106,17 @@ public class Material {
 
     /*
      * Sets the texture file
-     * need todo
+     *
      */
-    public void setTextureFile(string textureFile)
+    public void setTextureFile(String textureFile)
     {
         m_textureFile = textureFile;
 			System.out.println("Loading texture: " + m_textureFile + "...");
         m_texture = new Texture(m_textureFile);
-        if (!m_texture->isValid())
+        if (!m_texture.isValid())
         {
-            delete m_texture;
-            m_texture = NULL;
+            //delete m_texture;
+            m_texture = null;
             System.out.println("discarded");
         }
         else
@@ -126,7 +128,7 @@ public class Material {
     /*
      * Gets the texture file
      */
-    public string getTextureFile(){
+    public String getTextureFile(){
         return m_textureFile;
     }
 
@@ -143,6 +145,6 @@ public class Material {
      * need todo
      */
     Boolean hasTexture() {
-        return m_texture != "";
+        return m_texture != null;
     }
 }

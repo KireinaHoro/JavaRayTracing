@@ -1,10 +1,13 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.paint.Color;
+
+import java.util.Vector;
+
 public class LightSampler {
     protected
-    mutable mt19937_64 randomGenerator;/* random need todo */
-		vector<double> surfaceSum;
-		vector<Triangle> allTriangles;
+    Vector<Double> surfaceSum;
+    Vector<Triangle> allTriangles;
     double currentSum ;
 
     public

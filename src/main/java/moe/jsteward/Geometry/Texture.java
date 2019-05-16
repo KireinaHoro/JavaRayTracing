@@ -1,5 +1,8 @@
 package moe.jsteward.Geometry;
 
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import javafx.scene.paint.Color;
+
 public class Texture {
     private
     int m_width;
@@ -10,10 +13,10 @@ public class Texture {
      * Constructor
      * Author Louis
      */
-    public Texture(string filename) {
+    public Texture(String filename) {
         m_data = SOIL_load_image(filename.c_str(), &m_width, &m_height, 0, SOIL_LOAD_RGB);
         /* pointer need TODO*/
-        if (m_data == NULL)
+        if (m_data == null)
         {
 				System.out.println("Invalid texture file: " + filename);
         }
@@ -27,10 +30,10 @@ public class Texture {
     }
     */
     /*
-     * Verify if m_data is NULL
+     * Verify if m_data is null
      */
     public boolean isValid() {
-        return m_data != NULL;
+        return m_data != null;
     }
 
     /*
@@ -42,13 +45,13 @@ public class Texture {
         x = x%m_width;
         y = y%m_height;
         int offset = y * 3 * m_width + x * 3;
-        unsigned char r = m_data[offset];
-        unsigned char g = m_data[offset + 1];
-        unsigned char b = m_data[offset + 2];
+        char r = m_data[offset];
+        char g = m_data[offset + 1];
+        char b = m_data[offset + 2];
         return Color((double)(r) / 255.0f, (double)(g) / 255.0f, (double)(b) / 255.0f);
     }
 
-    public Color pixel(Vector2f v) {
+    public Color pixel(Vector2D v) {
         return pixel((int)(v[0] * m_width), (int)(v[1] * m_height));
     }
 }
