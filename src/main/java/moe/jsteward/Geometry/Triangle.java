@@ -23,7 +23,6 @@ public class Triangle {
     // \brief	Per vertex normal.
     protected Vector3D m_vertexNormal[] = new Vector3D[3];
     // \brief   flag of having m_textureCoordinates
-    protected boolean flagtexture = false;
     /*
      *  Sets a vertex normal.
      */
@@ -100,7 +99,6 @@ public class Triangle {
         m_textureCoordinates[0] = ta;
         m_textureCoordinates[1] = tb;
         m_textureCoordinates[2] = tc;
-        flagtexture = true;
         m_material = material;
         update();
         m_vertexNormal[0] = na;
@@ -120,7 +118,6 @@ public class Triangle {
         m_textureCoordinates[0] = ta;
         m_textureCoordinates[1] = tb;
         m_textureCoordinates[2] = tc;
-        flagtexture = true;
         m_material = material;
         update();
         m_vertexNormal[0] = normals[0];
@@ -140,7 +137,6 @@ public class Triangle {
         m_textureCoordinates[0] = ta;
         m_textureCoordinates[1] = tb;
         m_textureCoordinates[2] = tc;
-        flagtexture = true;
         m_material = material;
         update();
     }
@@ -221,7 +217,7 @@ public class Triangle {
      *  Samples the texture given the u,v coordinates of an intersection.
      */
     Color sampleTexture(double u, double v) {
-        if (m_material.hasTexture() && flagtexture) {
+        if (m_material.hasTexture() && m_textureCoordinates[0] != null) {
             return m_material.getTexture().pixel(interpolateTextureCoordinate(u, v));
         }
         return new Color(1.0, 1.0, 1.0, 0.0);
