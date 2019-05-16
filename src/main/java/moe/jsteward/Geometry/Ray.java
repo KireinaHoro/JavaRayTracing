@@ -6,11 +6,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  * a Ray with a source and direction.
  */
 public class Ray {
-    protected
-    Vector3D m_source;
-    Vector3D m_direction;
-    Vector3D m_invDirection;
-    int[] m_sign;
+    private Vector3D m_source;
+    private Vector3D m_direction;
+    private Vector3D m_invDirection;
+    private int[] m_sign;
 
     /**
      * Constructor.
@@ -66,7 +65,7 @@ public class Ray {
     /**
      * gets the sign[3].
      */
-    public int[] getSign() {
+    int[] getSign() {
         return m_sign;
     }
 

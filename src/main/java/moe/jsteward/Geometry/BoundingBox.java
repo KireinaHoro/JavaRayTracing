@@ -8,13 +8,13 @@ import java.util.LinkedList;
 
 public class BoundingBox {
     //  The bounds (min / max vectors).
-    protected Vector3D m_bounds[] = new Vector3D[2];
+    private Vector3D[] m_bounds = new Vector3D[2];
 
     /*
      *  Initializes the bounding box from the provided geometry.
      *  \param1	geometry :=  The geometry.
      */
-    public BoundingBox(final Geometry geometry) {
+    BoundingBox(final Geometry geometry) {
         set(geometry);
     }
 
@@ -60,7 +60,7 @@ public class BoundingBox {
      *  Sets the bouding box with the given geometry.
      *  \param1	geometry	The geometry.
      */
-    public void set(final Geometry geometry) {
+    private void set(final Geometry geometry) {
         Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
         m_bounds[0] = vertices.getFirst();
         m_bounds[1] = vertices.getFirst();
@@ -70,14 +70,14 @@ public class BoundingBox {
     /*
      *  return min(vector1,vector2)
      */
-    public Vector3D vectormin(Vector3D v1, Vector3D v2) {
+    private Vector3D vectormin(Vector3D v1, Vector3D v2) {
         return new Vector3D(Math.min(v1.getX(), v2.getX()), Math.min(v1.getY(), v2.getY()), Math.min(v1.getZ(), v2.getZ()));
     }
 
     /*
      *  return max(vector1,vector2)
      */
-    public Vector3D vectormax(Vector3D v1, Vector3D v2) {
+    private Vector3D vectormax(Vector3D v1, Vector3D v2) {
         return new Vector3D(Math.max(v1.getX(), v2.getX()), Math.max(v1.getY(), v2.getY()), Math.max(v1.getZ(), v2.getZ()));
     }
 
@@ -85,7 +85,7 @@ public class BoundingBox {
      *  Updates the bounding box with the given geometry.
      *  \param1	geometry :=  The geometry.
      */
-    public void update(final Geometry geometry) {
+    private void update(final Geometry geometry) {
         Deque<Vector3D> vertices = new LinkedList<Vector3D>(geometry.getVertices());
         Iterator<Vector3D> iter = vertices.iterator();
         while (iter.hasNext()) {
@@ -109,7 +109,7 @@ public class BoundingBox {
      *  Updates the bounding box with the provided point.
      *  \param1 Vector3D
      */
-    public void update(final Vector3D V) {
+    private void update(final Vector3D V) {
         m_bounds[0] = vectormin(m_bounds[0], V);
         m_bounds[1] = vectormax(m_bounds[1], V);
     }
@@ -118,7 +118,7 @@ public class BoundingBox {
      *  Updates this bounding box to bound the given boundingBox.
      *  \param1	boundingBox
      */
-    public void update(final BoundingBox boundingBox) {
+    void update(final BoundingBox boundingBox) {
         m_bounds[0] = vectormin(m_bounds[0], boundingBox.m_bounds[0]);
         m_bounds[1] = vectormax(m_bounds[1], boundingBox.m_bounds[1]);
     }
@@ -126,7 +126,7 @@ public class BoundingBox {
     /*
      *  return simdMul(vector1, vector2)
      */
-    public Vector3D simdMul(Vector3D v1, Vector3D v2) {
+    private Vector3D simdMul(Vector3D v1, Vector3D v2) {
         return new Vector3D(v1.getX() * v2.getX(), v1.getY() * v2.getY(), v1.getZ() * v2.getZ());
     }
 
@@ -138,7 +138,7 @@ public class BoundingBox {
      */
     public boolean intersect(final Ray ray, double t0, double t1, double e[]) {
 
-        int sign[] = ray.getSign();
+        int[] sign = ray.getSign();
         Vector3D tmin = new Vector3D(m_bounds[sign[0]].getX(), m_bounds[sign[1]].getY(), m_bounds[sign[2]].getZ());
         tmin = simdMul(tmin.subtract(ray.source()), ray.invDirection());
 

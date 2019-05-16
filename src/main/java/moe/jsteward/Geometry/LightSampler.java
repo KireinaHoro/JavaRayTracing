@@ -7,30 +7,21 @@ import java.util.Arrays;
 import java.util.Vector;
 
 public class LightSampler {
-    protected
-    Vector<Double> surfaceSum;
-    Vector<Triangle> allTriangles;
-    double currentSum ;
+    private Vector<Double> surfaceSum;
+    private Vector<Triangle> allTriangles;
+    private double currentSum;
 
     public
     LightSampler() {
         currentSum = 0.0;
     }
 
-    private boolean isBlack(Color a) {
-        return a.getRed() == 0.0 && a.getGreen() == 0.0 && a.getBlue() == 0.0;
-    }
-
-    private Color multiply(Color a, Color b) {
-        return new Color(a.getRed() * b.getRed(), a.getGreen() * b.getGreen(), a.getBlue() * b.getBlue(),
-                a.getOpacity());
-    }
 
     /*
      * Adds a triangle to the light sampler
      */
-    void add(Triangle triangle) {
-        if (!isBlack(triangle.material().getEmissive())) {
+    private void add(Triangle triangle) {
+        if (!StrangeMethods.isBlack(triangle.material().getEmissiveColor())) {
             currentSum += triangle.surface();
             surfaceSum.add(currentSum);
             allTriangles.add(triangle);
@@ -60,7 +51,9 @@ public class LightSampler {
         Vector3D point = allTriangles.elementAt(index).pointFromBraycentric(barycentric);
         Color color = allTriangles.elementAt(index).sampleTexture(barycentric);
 
-        return new PointLight(point, multiply(allTriangles.elementAt(index).material().getEmissive(), color));
+
+        return new PointLight(point, StrangeMethods.multiply(
+                allTriangles.elementAt(index).material().getEmissiveColor(), color));
     }
 
     /*

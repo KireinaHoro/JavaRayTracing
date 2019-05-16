@@ -7,33 +7,33 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 public class Triangle {
     // \brief	Pointers to the three vertices
-    protected Vector3D m_vertex[] = new Vector3D[3];
+    Vector3D[] m_vertex = new Vector3D[3];
     // \brief Pointers to the texture coordinates
-    protected Vector2D m_textureCoordinates[] = new Vector2D[3];
+    private Vector2D[] m_textureCoordinates = new Vector2D[3];
     // \brief	The vertex 0 (added to enhance cache consistency)
-    protected Vector3D m_vertex0;
+    private Vector3D m_vertex0;
     // \brief	The u axis.
-    protected Vector3D m_uAxis;
+    private Vector3D m_uAxis;
     // \brief	The v axis.
-    protected Vector3D m_vAxis;
+    private Vector3D m_vAxis;
     // \brief	The normal.
-    protected Vector3D m_normal;
+    private Vector3D m_normal;
     // \brief	The associated material.
-    Material m_material;
+    private PhongMaterialEx m_material;
     // \brief	Per vertex normal.
-    protected Vector3D m_vertexNormal[] = new Vector3D[3];
+    private Vector3D[] m_vertexNormal = new Vector3D[3];
     // \brief   flag of having m_textureCoordinates
     /*
      *  Sets a vertex normal.
      */
-    public void setVertexNormal(int index, final Vector3D normal) {
+    void setVertexNormal(int index, final Vector3D normal) {
         m_vertexNormal[index] = normal;
     }
 
     /*
      *  Gets a vertex normal.
      */
-    public final Vector3D getVertexNormal(int index) {
+    Vector3D getVertexNormal(int index) {
         return m_vertexNormal[index];
     }
 
@@ -51,14 +51,14 @@ public class Triangle {
     /*
      *  Gets a pointer to the vertex normals array (size = 3, one normal per vertex).
      */
-    public final Vector3D[] getVertexNormals() {
+    Vector3D[] getVertexNormals() {
         return m_vertexNormal;
     }
 
     /*
      *  Updates precomputed data. This method should be called if vertices are externally modified.
      */
-    public void update() {
+    void update() {
         m_vertex0 = m_vertex[0];
         m_uAxis = m_vertex[1].subtract(m_vertex[0]);
         m_vAxis = m_vertex[2].subtract(m_vertex[0]);
@@ -72,11 +72,10 @@ public class Triangle {
     /*
      *  Initializes a new instance of the "Triangle" class for TriangleMesh input.
      */
-    public Triangle(TriangleMesh triangleMesh, Material material) {
-        /* TODO triangle mesh */
-        float pointArray[] = new float[9];
-        float normalsArray[] = new float[9];
-        float coordinatesArray[] = new float[6];
+    public Triangle(TriangleMesh triangleMesh, PhongMaterialEx material) {
+        float[] pointArray = new float[9];
+        float[] normalsArray = new float[9];
+        float[] coordinatesArray = new float[6];
         triangleMesh.getPoints().toArray(pointArray);
         triangleMesh.getNormals().toArray(normalsArray);
         triangleMesh.getTexCoords().toArray(coordinatesArray);
@@ -111,7 +110,7 @@ public class Triangle {
      *  \param a,b,c :=  A pointer to the first,second,third vertex.
      *  \param ta,tb,tc :=  The texture coordinates of the first,second,third vertex.
      */
-    public Triangle(Vector3D a, Vector3D b, Vector3D c, Vector2D ta, Vector2D tb, Vector2D tc, Material material, final Vector3D normals[]) {
+    Triangle(Vector3D a, Vector3D b, Vector3D c, Vector2D ta, Vector2D tb, Vector2D tc, PhongMaterialEx material, final Vector3D[] normals) {
         m_vertex[0] = a;
         m_vertex[1] = b;
         m_vertex[2] = c;
@@ -130,7 +129,7 @@ public class Triangle {
      *  \param a,b,c :=  A pointer to the first,second,third vertex.
      *  \param ta,tb,tc :=  The texture coordinates of the first,second,third vertex.
      */
-    public Triangle(Vector3D a, Vector3D b, Vector3D c, Vector2D ta, Vector2D tb, Vector2D tc, Material material) {
+    public Triangle(Vector3D a, Vector3D b, Vector3D c, Vector2D ta, Vector2D tb, Vector2D tc, PhongMaterialEx material) {
         m_vertex[0] = a;
         m_vertex[1] = b;
         m_vertex[2] = c;
@@ -144,7 +143,7 @@ public class Triangle {
     /*
      *  Initializes a new instance of the "Triangle" class.
      */
-    public Triangle(Vector3D a, Vector3D b, Vector3D c, Material material, final Vector3D normals[]) {
+    Triangle(Vector3D a, Vector3D b, Vector3D c, PhongMaterialEx material, final Vector3D[] normals) {
         m_vertex[0] = a;
         m_vertex[1] = b;
         m_vertex[2] = c;
@@ -159,7 +158,7 @@ public class Triangle {
     /*
      *  Initializes a new instance of the "Triangle" class.
      */
-    public Triangle(Vector3D a, Vector3D b, Vector3D c, Material material) {
+    public Triangle(Vector3D a, Vector3D b, Vector3D c, PhongMaterialEx material) {
         m_vertex[0] = a;
         m_vertex[1] = b;
         m_vertex[2] = c;
@@ -178,14 +177,14 @@ public class Triangle {
     /*
      *  Gets the material.
      */
-    public Material material() {
+    PhongMaterialEx material() {
         return m_material;
     }
 
     /*
      *  Gets the ith vertex
      */
-    public final Vector3D vertex(int i) {
+    Vector3D vertex(int i) {
         assert (i >= 0 && i < 3);
         return (m_vertex[i]);
     }
@@ -201,7 +200,7 @@ public class Triangle {
     /*
      *  Gets the textures coordinates of a vertex.
      */
-    public final Vector2D textureCoordinate(int i) {
+    Vector2D textureCoordinate(int i) {
         assert (i >= 0 && i < 3);
         return m_textureCoordinates[i];
     }
@@ -209,7 +208,7 @@ public class Triangle {
     /*
      *  Interpolates the texture coordinate given the u,v coordinates of an intersection.
      */
-    public Vector2D interpolateTextureCoordinate(double u, double v) {
+    private Vector2D interpolateTextureCoordinate(double u, double v) {
         return textureCoordinate(0).scalarMultiply(1 - u - v).add(textureCoordinate(1).scalarMultiply(u)).add(textureCoordinate(2).scalarMultiply(v));
     }
 
@@ -217,8 +216,9 @@ public class Triangle {
      *  Samples the texture given the u,v coordinates of an intersection.
      */
     Color sampleTexture(double u, double v) {
-        if (m_material.hasTexture() && m_textureCoordinates[0] != null) {
-            return m_material.getTexture().pixel(interpolateTextureCoordinate(u, v));
+        if (StrangeMethods.hasTexture(m_material)
+                && m_textureCoordinates[0] != null) {
+            return StrangeMethods.getTexture(m_material, interpolateTextureCoordinate(u, v));
         }
         return new Color(1.0, 1.0, 1.0, 0.0);
     }
@@ -226,14 +226,14 @@ public class Triangle {
     /*
      *   Samples the triangle given the u,v coordinates of an intersection
      */
-    public Vector3D samplePoint(double u, double v) {
+    Vector3D samplePoint(double u, double v) {
         return m_uAxis.scalarMultiply(u).add(m_vAxis.scalarMultiply(v)).add(m_vertex0);
     }
 
     /*
      *  Samples the normal given the u,v coordinates of an intersection. The normal is oriented toward the 'toward' point.
      */
-    public Vector3D sampleNormal(double u, double v, final Vector3D toward) {
+    Vector3D sampleNormal(double u, double v, final Vector3D toward) {
         Vector3D result = m_vertexNormal[0].scalarMultiply(1 - u - v).add(m_vertexNormal[1].scalarMultiply(u)).add(m_vertexNormal[2].scalarMultiply(v)).normalize();
         if ((toward.subtract(m_vertex0.add(m_uAxis.scalarMultiply(u)).add(m_vAxis.scalarMultiply(v)))).dotProduct(result) < 0.0) {
             return result.scalarMultiply(-1.0).normalize();
@@ -244,21 +244,21 @@ public class Triangle {
     /*
      *  Gets the u axis.
      */
-    public final Vector3D uAxis() {
+    private Vector3D uAxis() {
         return m_uAxis;
     }
 
     /*
      *  Gets the v axis.
      */
-    public final Vector3D vAxis() {
+    private Vector3D vAxis() {
         return m_vAxis;
     }
 
     /*
      *  Gets the normal.
      */
-    public final Vector3D normal() {
+    Vector3D normal() {
         return m_normal;
     }
 
@@ -275,14 +275,14 @@ public class Triangle {
     /*
      *  Returns the direction of a reflected ray, from a surface normal and the direction of the incident ray.
      */
-    public static Vector3D reflectionDirection(final Vector3D n, final Vector3D dir) {
+    static Vector3D reflectionDirection(final Vector3D n, final Vector3D dir) {
         return new Vector3D(dir.subtract(n.scalarMultiply(2.0 * dir.dotProduct(n))).toArray());
     }
 
     /*
      *  Returns the direction of a reflected ray, from the direction of the incident ray.
      */
-    public Vector3D reflectionDirection(final Vector3D dir) {
+    Vector3D reflectionDirection(final Vector3D dir) {
         Vector3D n = normal();
         return new Vector3D(dir.subtract(n.scalarMultiply(2.0 * dir.dotProduct(n))).toArray());
     }
@@ -302,7 +302,7 @@ public class Triangle {
      *  Computes the intersection between a ray and this triangle.
      *  tuv[0] = t, tuv[1] = u, tuv[2] = v;
      */
-    public boolean intersection(final Ray r, double tuv[]) {
+    boolean intersection(final Ray r, double[] tuv) {
         /* find vectors for two edges sharing vert0 */
         final Vector3D edge1 = new Vector3D(uAxis().toArray());
         final Vector3D edge2 = new Vector3D(vAxis().toArray());
@@ -349,7 +349,7 @@ public class Triangle {
      *  Computes the intersection between the ray and the plane supporting the triangle.
      *  tuv[0] = t, tuv[1] = u, tuv[2] = v;
      */
-    public boolean generalIntersection(final Ray r, double tuv[]) {
+    public boolean generalIntersection(final Ray r, double[] tuv) {
         /* find vectors for two edges sharing vert0 */
         final Vector3D edge1 = new Vector3D(uAxis().toArray());
         final Vector3D edge2 = new Vector3D(vAxis().toArray());
@@ -388,14 +388,14 @@ public class Triangle {
     /*
      *  Returns the surface of the triangle
      */
-    public double surface() {
+    double surface() {
         return (m_uAxis.crossProduct(m_vAxis)).getNorm() / 2.0;
     }
 
     /*
      *  Computes random barycentric coordinates
      */
-    public Vector3D randomBarycentric() {
+    Vector3D randomBarycentric() {
         double r = Math.random();
         double s = Math.random();
         double a = 1.0 - Math.sqrt(s);
@@ -407,7 +407,7 @@ public class Triangle {
     /*
      *  Computes a point on a triangle from the barycentric coordinates
      */
-    public Vector3D pointFromBraycentric(final Vector3D barycentric) {
+    Vector3D pointFromBraycentric(final Vector3D barycentric) {
         Vector3D tmp = randomBarycentric();
         return (m_vertex[0].scalarMultiply(tmp.getX()).add(m_vertex[1].scalarMultiply(tmp.getY())).add(m_vertex[2].scalarMultiply(tmp.getZ())));
     }
@@ -415,12 +415,12 @@ public class Triangle {
     /*
      *  Samples the texture from the provided barycentric coordinates
      */
-    public Color sampleTexture(final Vector3D barycentic) {
-        if (m_material.hasTexture()) {
+    Color sampleTexture(final Vector3D barycentic) {
+        if (StrangeMethods.hasTexture(m_material)) {
             Vector2D textureCoord = textureCoordinate(0).scalarMultiply(barycentic.getX()).
                     add(textureCoordinate(1).scalarMultiply(barycentic.getY())).
                     add(textureCoordinate(2).scalarMultiply(barycentic.getZ()));
-            return m_material.getTexture().pixel(textureCoord);
+            return StrangeMethods.getTexture(m_material, textureCoord);
         }
         return new Color(1.0, 1.0, 1.0, 0.0);
     }

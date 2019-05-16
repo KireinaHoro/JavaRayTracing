@@ -2,17 +2,15 @@ package moe.jsteward.Geometry;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import java.awt.*;
 
-public class Material {
-    protected
-    Color m_ambientColor ;
-    Color m_diffuseColor ;
-    Color m_specularColor ;
-    double    m_shininess ;
-    Color m_emissiveColor ;
-    String m_textureFile;
-    Texture  m_texture;
+public class Material_unused {
+    private Color m_ambientColor;
+    private Color m_diffuseColor;
+    private Color m_specularColor;
+    private double m_shininess;
+    private Color m_emissiveColor;
+    private String m_textureFile;
+//    private Texture_unused  m_texture;
 
 
 
@@ -20,7 +18,7 @@ public class Material {
      *  Constructor1
      *  author Louis
      */
-    public Material(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, String textureFile){
+    public Material_unused(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, String textureFile) {
         ambientColor = new Color(0,0,0,1);
         diffuseColor = new Color(0,0,0,1);
         specularColor = new Color(0,0,0,1);
@@ -33,23 +31,29 @@ public class Material {
         m_shininess = shininess;
         m_emissiveColor = emissiveColor;
         m_textureFile = textureFile;
-        m_texture = null;
+        //m_texture = null;
     }
 
     /*
      * need todo
      */
-    public Material(PhongMaterial phongmaterial){
-        if(phongmaterial.getBumpMap() == null && phongmaterial.getdiffuseMap() == null &&
-           phongmaterial.getspecularMap() == null && phongmaterial.getselfIlluminationMap() == null) {
-            m_texture = null;
+    public Material_unused(PhongMaterial phongmaterial) {
+        /*
+        if(phongmaterial.getBumpMap() == null && phongmaterial.getDiffuseMap() == null &&
+           phongmaterial.getSpecularMap() == null && phongmaterial.getSelfIlluminationMap() == null) {
+            //m_texture = null;
         }
-        else m_texture = phongmaterial.getbumpMap() + phongmaterial.getdiffuseMap() + phongmaterial.getspecularMap() + phongmaterial.getselfIlluminationMap();
-        m_ambientColor = new Color(2,2,2 ,1);
-        m_diffuseColor = phongmaterial.getdiffuseColor();
-        m_specularColor = phongmaterial.getspecularColor();
-        m_emissiveColor = new Color(2,2,2,1);
-        m_shininess = phongmaterial.getspecularPower();
+        else m_texture = phongmaterial.getBumpMap()
+            phongmaterial.getDiffuseMap()
+            phongmaterial.getSpecularMap()
+            phongmaterial.getSelfIlluminationMap();
+        */
+        // TODO how to imply add() here?
+        m_ambientColor = new Color(0, 0, 0, 1);
+        m_diffuseColor = phongmaterial.getDiffuseColor();
+        m_specularColor = phongmaterial.getSpecularColor();
+        m_emissiveColor = new Color(0, 0, 0, 1);
+        m_shininess = phongmaterial.getSpecularPower();
     }
 
     /*
@@ -129,8 +133,9 @@ public class Material {
     public void setTextureFile(String textureFile)
     {
         m_textureFile = textureFile;
-			System.out.println("Loading texture: " + m_textureFile + "...");
-        m_texture = new Texture(m_textureFile);
+        System.out.println("Loading texture: " + m_textureFile + "...");
+		/*
+		m_texture = new Texture_unused(m_textureFile);
         if (!m_texture.isValid())
         {
             //delete m_texture;
@@ -141,6 +146,7 @@ public class Material {
         {
             System.out.println("OK");
         }
+        */
     }
 
     /*
@@ -153,16 +159,20 @@ public class Material {
     /*
      * Gets the texture
      *
-     */
-    public Texture getTexture() {
-        return m_texture;
+
+    public Texture_unused getTexture() {
+        return
+        //return m_texture;
     }
+    */
 
     /*
+    /
      * Tests if a texture is associated with this material
      *
-     */
+     //
     Boolean hasTexture() {
         return m_texture != null;
     }
+    */
 }

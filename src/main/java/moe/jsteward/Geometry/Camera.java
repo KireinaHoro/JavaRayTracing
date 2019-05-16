@@ -1,54 +1,54 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.paint.Color;
 import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 public class Camera {
     //  The camera position.
-    protected Vector3D m_position;
+    private Vector3D m_position;
 
     //  The aim of the camera.
-    protected Vector3D m_target;
+    private Vector3D m_target;
 
     //  Distance of the focal plane.
-    protected double m_planeDistance;
+    private double m_planeDistance;
 
     //  Width of the projection rectangle.
-    protected double m_planeWidth;
+    private double m_planeWidth;
 
     //  Height of the projection rectangle.
-    protected double m_planeHeight;
+    private double m_planeHeight;
 
     //  The front vector of the camera.
-    protected Vector3D m_front;
+    private Vector3D m_front;
 
     //  The right vector.
-    protected Vector3D m_right;
+    private Vector3D m_right;
 
     //  The down vector.
-    protected Vector3D m_down;
+    private Vector3D m_down;
 
     //  The width vector of the projection rectangle.
-    protected Vector3D m_widthVector;
+    private Vector3D m_widthVector;
 
     //  The height vector of the projection rectangle.
-    protected Vector3D m_heightVector;
+    private Vector3D m_heightVector;
 
     //  The upper left point oft he projection rectangle.
-    protected Vector3D m_upLeftPoint;
+    private Vector3D m_upLeftPoint;
 
     /*
      *  rotate a Quaternion by another Quaternion
      */
-    public Vector3D rotate(Quaternion m1, Quaternion m2) {
+    private Vector3D rotate(Quaternion m1, Quaternion m2) {
         return new Vector3D(m1.multiply(m2).multiply(m1.getInverse()).getVectorPart());
     }
 
     /*
      *  Calculates the camera parameters.
      */
-    protected void computeParameters() {
+    private void computeParameters() {
         m_front = m_target.subtract(m_position);
         m_front = m_front.normalize();
         m_right = rotate(new Quaternion(-3.14159265f / 2.0, 0.0, 0.0, 1.0), new Quaternion(m_front.toArray()));
@@ -169,7 +169,7 @@ public class Camera {
      *  \param1	coordX :=  X coordinate in the projection rectangle.
      *  \param2	coordY :=  Y coordinate in the projection rectangle.
      */
-    Ray getRay(double coordX, double coordY) {
+    Ray getRay(final double coordX, final double coordY) {
         return new Ray(m_position, m_widthVector.scalarMultiply(coordX).add(m_upLeftPoint).add(m_heightVector.scalarMultiply(coordY)).subtract(m_position));
     }
 }

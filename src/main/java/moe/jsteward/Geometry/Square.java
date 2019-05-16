@@ -2,11 +2,11 @@ package moe.jsteward.Geometry;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-public class Square extends Geometry {
+class Square extends Geometry {
     /*
      *  Constructor for Square
      */
-    public Square(Material material) {
+    Square(PhongMaterialEx material) {
         int p0 = addVertex(new Vector3D(0.5, 0.5, 0.0));
         int p1 = addVertex(new Vector3D(0.5, -0.5, 0.0));
         int p2 = addVertex(new Vector3D(-0.5, 0.5, 0.0));

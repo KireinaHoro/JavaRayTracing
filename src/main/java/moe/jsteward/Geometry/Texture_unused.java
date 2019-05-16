@@ -3,18 +3,17 @@ package moe.jsteward.Geometry;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import javafx.scene.paint.Color;
 
-public class Texture {
-    private
-    int m_width;
-    int m_height;
-    char[]  m_data;/*Maybe unsigned */
+public class Texture_unused {
+    private int m_width;
+    private int m_height;
+    private char[] m_data;/*Maybe unsigned */
 
     /*
      * Constructor
      * Author Louis
      */
-    public Texture(String filename) {
-        m_data = SOIL_load_image(filename.c_str(), &m_width, &m_height, 0, SOIL_LOAD_RGB);
+    Texture_unused(String filename) {
+        m_data = SOIL_load_image(filename, m_width, m_height, 0, SOIL_LOAD_RGB);
         /* pointer need TODO*/
         if (m_data == null)
         {
@@ -25,21 +24,21 @@ public class Texture {
     /*
      * Dstructor need todo
 
-    public ~Texture() {
+    public ~Texture_unused() {
         SOIL_free_image_data(m_data);
     }
     */
     /*
      * Verify if m_data is null
      */
-    public boolean isValid() {
+    boolean isValid() {
         return m_data != null;
     }
 
     /*
      * Calculate the pixel
      */
-    public Color pixel(int x, int y) {
+    private Color pixel(int x, int y) {
         while (x < 0) { x += m_width; }
         while (y < 0) { y += m_height; }
         x = x%m_width;
@@ -48,7 +47,7 @@ public class Texture {
         char r = m_data[offset];
         char g = m_data[offset + 1];
         char b = m_data[offset + 2];
-        return Color((double)(r) / 255.0f, (double)(g) / 255.0f, (double)(b) / 255.0f);
+        return new Color((double) (r) / 255.0f, (double) (g) / 255.0f, (double) (b) / 255.0f, 1);
     }
 
     /*
