@@ -2,10 +2,14 @@ package moe.jsteward.Geometry;
 
 import moe.jsteward.Geometry.BoundingBox;
 
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
+
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -14,25 +18,32 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  * an instance of geometry scene that can be rendered with ray casting.
  */
 public class Scene {
-    protected
-    Visualizer m_visu;
-    List<MutablePair<BoundingBox, Geometry>> m_geometries
+    public Color visuBuffer[][];
+    private List<MutablePair<BoundingBox, Geometry>> m_geometries
             = new LinkedList<MutablePair<BoundingBox, Geometry>>();
-    List<PointLight> m_lights;
-    Camera m_camera;
-    BoundingBox m_sceneBoundingBox;
-    int m_diffuseSamples;
-    int m_specularSamples;
-    int m_lightSamples;
-    int m_pass;
-    LightSampler m_lightSampler;
-    KDNode kdTree;
+    private List<PointLight> m_lights;
+    private Camera m_camera;
+    private BoundingBox m_sceneBoundingBox;
+    private int m_diffuseSamples;
+    private int m_specularSamples;
+    private int m_lightSamples;
+    private int m_pass;
+    private LightSampler m_lightSampler;
+    private KDNode kdTree;
 
     /**
      * Constructor.
      */
-    public Scene(Visualizer visu) {
-        m_visu = visu;
+    public Scene() {
+        m_diffuseSamples = 30;
+        m_specularSamples = 30;
+        m_lightSamples = 0;
+    }
+    /**
+     * Constructor.
+     */
+    public Scene(Color[][] _visuBuffer) {
+        visuBuffer = _visuBuffer;
         m_diffuseSamples = 30;
         m_specularSamples = 30;
         m_lightSamples = 0;
@@ -181,7 +192,7 @@ public class Scene {
     /**
      * sends a ray in this Scene, returns the computed Color.
      */
-    public Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
+    private Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
         Color result = new Color(0, 0, 0, 1);
         // calculate intersection of current ray.
         RayTriangleIntersection intersection = getIntersection(ray, null);
@@ -256,7 +267,7 @@ public class Scene {
     /**
      * computes a rendering of this Scene.
      */
-    void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
+    public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<Triangle>();
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {
@@ -274,9 +285,9 @@ public class Scene {
         double step = 1.0 / subPixelDivision;
         // Table accumulating values computed per pixel (enable rendering of each pass)
         // TODO somehow strange...
-        Vector<Vector<MutablePair<Integer, Color>>> pixelTable =
-                new Vector<Vector<MutablePair<Integer, Color>>>
-                        (m_visu.width(), new Vector<MutablePair<Integer, Color>>(m_visu.width(), new MutablePair(0, new Color(0, 0, 0, 1))));
+        //Vector<Vector<MutablePair<Integer, Color>>> pixelTable =
+        //        new Vector<Vector<MutablePair<Integer, Color>>>
+        //                (m_visu.width(), new Vector<MutablePair<Integer, Color>>(m_visu.width(), new MutablePair(0, new Color(0, 0, 0, 1))));
 
         // 1 - Rendering time
         long t1, t2;           // timeStamps
@@ -295,6 +306,15 @@ public class Scene {
                     ++m_pass;
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
                     // TODO Stream to be implemented...
+
+                    Arrays.stream(visuBuffer)
+                            .parallel()
+                            .map(visuRow -> IntStream.range(0, visuBuffer[0].length)
+                                    .mapToDouble(i -> IntStream.range(0, visuBuffer.length)
+                                            .map(j -> sendRay()
+                                            ).toArray()).toArray(double[][]::new);
+
+                    /*
 #pragma omp parallel for schedule(dynamic)//, 10)//guided)//dynamic)
                     for (int y = 0; y < m_visu.height(); y++) {
                         for (int x = 0; x < m_visu.width(); x++) {
@@ -304,9 +324,9 @@ public class Scene {
 // Ray casting
                             Color result = sendRay(m_camera.getRay(((double) x + xp) / m_visu.width(), ((double) y + yp) / m_visu.height()), 0, maxDepth, m_diffuseSamples, m_specularSamples);
                             // Accumulation of ray casting result in the associated pixel
-                            MutablePair<Integer, Color> currentPixel = pixelTable.elementAt(x).elementAt(y);
-                            currentPixel.left++;
-                            currentPixel.right = add(result, currentPixel.right);
+                            //MutablePair<Integer, Color> currentPixel = pixelTable.elementAt(x).elementAt(y);
+                            //currentPixel.left++;
+                            //currentPixel.right = add(result, currentPixel.right);
                             // Pixel rendering (with simple tone mapping)
 #pragma omp critical(visu)
                             m_visu.plot(x, y, divide(pixelTable.elementAt(x).elementAt(y).right,
@@ -321,6 +341,7 @@ public class Scene {
                         m_visu.update();
                         //TODO buffer Array to be implemented.
                     }
+                    */
                     // Updates the rendering context (per pass)
                     //m_visu.update();
                     // We print time for each pass
