@@ -162,6 +162,30 @@ public class BoundingBox {
         return intersectionFound;
     }
 
+    boolean intersect(final Ray ray) {
+
+        int[] sign = ray.getSign();
+        Vector3D tmin = new Vector3D(m_bounds[sign[0]].getX(), m_bounds[sign[1]].getY(), m_bounds[sign[2]].getZ());
+        tmin = simdMul(tmin.subtract(ray.source()), ray.invDirection());
+
+        Vector3D tmax = new Vector3D(m_bounds[1 - sign[0]].getX(), m_bounds[1 - sign[1]].getY(), m_bounds[1 - sign[2]].getZ());
+        tmax = simdMul(tmax.subtract(ray.source()), ray.invDirection());
+
+        if ((tmin.getX() > tmax.getY()) || (tmin.getY() > tmax.getX())) return false;
+
+        if (tmin.getY() > tmin.getX()) tmin = new Vector3D(tmin.getY(), tmin.getY(), tmin.getZ());
+
+        if (tmax.getY() < tmax.getX()) tmax = new Vector3D(tmax.getY(), tmax.getY(), tmax.getZ());
+
+        if ((tmin.getX() > tmax.getZ()) || (tmin.getZ() > tmax.getX())) return false;
+
+        if (tmin.getZ() > tmin.getX()) tmin = new Vector3D(tmin.getZ(), tmin.getY(), tmin.getZ());
+
+        if (tmax.getZ() < tmax.getX()) tmax = new Vector3D(tmax.getZ(), tmax.getY(), tmax.getZ());
+
+        return true;
+    }
+
     public Vector3D min() {
         return m_bounds[0];
     }

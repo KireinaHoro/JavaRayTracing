@@ -222,9 +222,9 @@ public class Geometry {
      * @param v the scale factor.
      */
     public void scale(double v) {
-        for (Vector3D vec : m_vertices) {
-            vec = vec.scalarMultiply(v);
-        }
+        m_vertices = m_vertices.stream()
+                .map(vec -> vec.scalarMultiply(v))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -233,9 +233,9 @@ public class Geometry {
      * @param v the scale factor on X axis.
      */
     public void scaleX(double v) {
-        for (Vector3D vec : m_vertices) {
-            vec = new Vector3D(v * vec.getX(), vec.getY(), vec.getZ());
-        }
+        m_vertices = m_vertices.stream()
+                .map(vec -> new Vector3D(v * vec.getX(), vec.getY(), vec.getZ()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -244,9 +244,9 @@ public class Geometry {
      * @param v the scale factor on Y axis.
      */
     public void scaleY(double v) {
-        for (Vector3D vec : m_vertices) {
-            vec = new Vector3D(vec.getX(), v * vec.getY(), vec.getZ());
-        }
+        m_vertices = m_vertices.stream()
+                .map(vec -> new Vector3D(vec.getX(), v * vec.getY(), vec.getZ()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -255,9 +255,9 @@ public class Geometry {
      * @param v the scale factor on Z axis.
      */
     public void scaleZ(double v) {
-        for (Vector3D vec : m_vertices) {
-            vec = new Vector3D(vec.getX(), vec.getY(), v * vec.getZ());
-        }
+        m_vertices = m_vertices.stream()
+                .map(vec -> new Vector3D(vec.getX(), vec.getY(), v * vec.getZ()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -266,11 +266,12 @@ public class Geometry {
      * @param q the rotation Quaternion.
      */
     void rotate(Quaternion q) {
-        for (Vector3D vec : m_vertices) {
-            vec = new Vector3D
-                    (q.multiply(new Quaternion(vec.toArray())).
-                            multiply(q.getConjugate()).getVectorPart());
-        }
+        m_vertices = m_vertices.stream()
+                .map(vec -> new Vector3D
+                        (q.multiply(new Quaternion(vec.toArray())).
+                                multiply(q.getConjugate()).getVectorPart())
+                )
+                .collect(Collectors.toList());
     }
 
     /**
