@@ -100,6 +100,5 @@ public class RenderController {
                         }
                 ));
         timeline.playFromStart();
-
     }
 }
