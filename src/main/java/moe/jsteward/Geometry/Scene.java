@@ -1,13 +1,12 @@
 package moe.jsteward.Geometry;
 
-import moe.jsteward.Geometry.BoundingBox;
-
-import java.util.Vector;
-import java.util.LinkedList;
-import java.util.List;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 
 /**
@@ -260,9 +259,7 @@ public class Scene {
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<Triangle>();
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {
-            for (Triangle triangle : pair.right.getTriangles()) {
-                listTriangle.add(triangle);
-            }
+            listTriangle.addAll(pair.right.getTriangles());
         }
         kdTree = new KDNode(listTriangle, 0);
         // prepare lightSampler (stores triangles with a non null emissive component)
