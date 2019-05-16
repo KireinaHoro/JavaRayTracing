@@ -48,18 +48,26 @@ class Ray {
         return m_invDirection;
     }
 
+    class projectResult {
+        public final double t;
+        public final Vector3D delta;
+
+        public projectResult(double _t, Vector3D _delta) {
+            t = _t;
+            delta = _delta;
+        }
+    }
     /**
      * projects a point on this ray. point = t*source + delta.
      *
      * @param point the point.
-     * @param delta add factor.
      * @return the multi factor t.
      */
-    public double project(Vector3D point, Vector3D delta) {
+    public projectResult project(Vector3D point) {
         /* TODO return type to be informed*/
         double t = (point.subtract(source())).dotProduct(direction());
-        delta = (point.subtract(source())).subtract(direction().scalarMultiply(t));
-        return t;
+        Vector3D delta = (point.subtract(source())).subtract(direction().scalarMultiply(t));
+        return new projectResult(t, delta);
     }
 
     /**
