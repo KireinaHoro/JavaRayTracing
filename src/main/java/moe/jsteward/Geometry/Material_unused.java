@@ -10,7 +10,7 @@ public class Material_unused {
     private double m_shininess;
     private Color m_emissiveColor;
     private String m_textureFile;
-//    private Texture  m_texture;
+//    private Texture_unused  m_texture;
 
 
 
@@ -135,7 +135,7 @@ public class Material_unused {
         m_textureFile = textureFile;
         System.out.println("Loading texture: " + m_textureFile + "...");
 		/*
-		m_texture = new Texture(m_textureFile);
+		m_texture = new Texture_unused(m_textureFile);
         if (!m_texture.isValid())
         {
             //delete m_texture;
@@ -160,7 +160,7 @@ public class Material_unused {
      * Gets the texture
      *
 
-    public Texture getTexture() {
+    public Texture_unused getTexture() {
         return
         //return m_texture;
     }

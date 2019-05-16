@@ -3,7 +3,7 @@ package moe.jsteward.Geometry;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import javafx.scene.paint.Color;
 
-public class Texture {
+public class Texture_unused {
     private int m_width;
     private int m_height;
     private char[] m_data;/*Maybe unsigned */
@@ -12,7 +12,7 @@ public class Texture {
      * Constructor
      * Author Louis
      */
-    Texture(String filename) {
+    Texture_unused(String filename) {
         m_data = SOIL_load_image(filename, m_width, m_height, 0, SOIL_LOAD_RGB);
         /* pointer need TODO*/
         if (m_data == null)
@@ -24,7 +24,7 @@ public class Texture {
     /*
      * Dstructor need todo
 
-    public ~Texture() {
+    public ~Texture_unused() {
         SOIL_free_image_data(m_data);
     }
     */
