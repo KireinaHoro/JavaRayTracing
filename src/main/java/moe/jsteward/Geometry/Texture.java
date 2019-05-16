@@ -8,6 +8,7 @@ public class Texture {
 
     /*
      * Constructor
+     * Author Louis
      */
     public Texture(string filename) {
         m_data = SOIL_load_image(filename.c_str(), &m_width, &m_height, 0, SOIL_LOAD_RGB);
@@ -20,22 +21,22 @@ public class Texture {
 
     /*
      * Dstructor need todo
-     */
+
     public ~Texture() {
         SOIL_free_image_data(m_data);
     }
-
+    */
     /*
      * Verify if m_data is NULL
      */
-    public bool isValid() {
+    public boolean isValid() {
         return m_data != NULL;
     }
 
     /*
      * Calculate the pixel
      */
-    public RGBColor pixel(int x, int y) {
+    public Color pixel(int x, int y) {
         while (x < 0) { x += m_width; }
         while (y < 0) { y += m_height; }
         x = x%m_width;
@@ -44,10 +45,10 @@ public class Texture {
         unsigned char r = m_data[offset];
         unsigned char g = m_data[offset + 1];
         unsigned char b = m_data[offset + 2];
-        return RGBColor((double)(r) / 255.0f, (double)(g) / 255.0f, (double)(b) / 255.0f);
+        return Color((double)(r) / 255.0f, (double)(g) / 255.0f, (double)(b) / 255.0f);
     }
 
-    public RGBColor pixel(Vector2f v) {
+    public Color pixel(Vector2f v) {
         return pixel((int)(v[0] * m_width), (int)(v[1] * m_height));
     }
 }

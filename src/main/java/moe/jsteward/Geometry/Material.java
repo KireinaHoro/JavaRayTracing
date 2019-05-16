@@ -2,11 +2,11 @@ package moe.jsteward.Geometry;
 
 public class Material {
     protected
-    RGBColor m_ambientColor ;
-    RGBColor m_diffuseColor ;
-    RGBColor m_specularColor ;
+    Color m_ambientColor ;
+    Color m_diffuseColor ;
+    Color m_specularColor ;
     double    m_shininess ;
-    RGBColor m_emissiveColor ;
+    Color m_emissiveColor ;
     string m_textureFile;
     Texture * m_texture;/* Pointer need todo */
 
@@ -16,12 +16,12 @@ public class Material {
      *  Constructor
      *  author Louis
      */
-    public Material(RGBColor ambientColor, RGBColor diffuseColor, RGBColor specularColor, double shininess, RGBColor emissiveColor, string textureFile){
-        ambientColor = RGBColor();
-        diffuseColor = RGBColor();
-        specularColor = RGBColor();
+    public Material(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, string textureFile){
+        ambientColor = Color();
+        diffuseColor = Color();
+        specularColor = Color();
         shininess = 1.0;
-        emissiveColor = RGBColor();
+        emissiveColor = Color();
         textureFile = NULL;
         m_ambientColor = ambientColor;
         m_diffuseColor = diffuseColor;
@@ -29,48 +29,48 @@ public class Material {
         m_shininess = shininess;
         m_emissiveColor = emissiveColor;
         m_textureFile = textureFile;
-        m_texture = NULL;
+        m_texture = "";
     }
 
     /*
      * Sets the ambient color
      */
-    public void setAmbient(RGBColor color) {
+    public void setAmbient(Color color) {
         m_ambientColor = color;
     }
 
     /*
      * Gets the ambient color
      */
-    public RGBColor getAmbient(){
+    public Color getAmbient(){
         return m_ambientColor ;
     }
 
     /*
      * Sets the diffuse color
      */
-    public void setDiffuse(RGBColor color) {
+    public void setDiffuse(Color color) {
         m_diffuseColor = color;
     }
 
     /*
      * Gets the diffuse color
      */
-    public RGBColor getDiffuse() {
+    public Color getDiffuse() {
         return m_diffuseColor ;
     }
 
     /*
      * Sets the specular color
      */
-    public void setSpecular(RGBColor color) {
+    public void setSpecular(Color color) {
         m_specularColor = color;
     }
 
     /*
      * Gets the specular color
      */
-    public RGBColor getSpecular() {
+    public Color getSpecular() {
         return m_specularColor ;
     }
 
@@ -91,20 +91,20 @@ public class Material {
     /*
      * Sets the emissive color
      */
-    void setEmissive(RGBColor color) {
+    void setEmissive(Color color) {
         m_emissiveColor = color;
     }
 
     /*
      * Gets the emissive color
      */
-    public RGBColor getEmissive() {
+    public Color getEmissive() {
         return m_emissiveColor ;
     }
 
     /*
      * Sets the texture file
-     * need to correct
+     * need todo
      */
     public void setTextureFile(string textureFile)
     {
@@ -132,17 +132,17 @@ public class Material {
 
     /*
      * Gets the texture
-     * need to correct
+     * need todo
      */
     public Texture getTexture() {
-        return *m_texture;
+        return m_texture;
     }
 
     /*
      * Tests if a texture is associated with this material
-     * need to correct
+     * need todo
      */
     Boolean hasTexture() {
-        return m_texture != NULL;
+        return m_texture != "";
     }
 }

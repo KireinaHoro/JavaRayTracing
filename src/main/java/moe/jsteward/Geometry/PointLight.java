@@ -1,17 +1,18 @@
 package moe.jsteward.Geometry;
 
 /*
-   need something import
+   need something import todo
  */
 public class PointLight {
     Vector3f m_position ;
-    RGBColor m_color ;
+    Color m_color ;
     /*
+     *   author Louis
      *   Constructor
      */
-    public PointLight(Vector3f position, RGBColor color ){
+    public PointLight(Vector3f position, Color color ){
         position = Vector3f.makeVector(0.0,0.0,0.0);
-        color = RGBColor();
+        color = Color();
         m_position=position;
         m_color=color;
     }
@@ -19,7 +20,7 @@ public class PointLight {
     /*
      *  get the color
      */
-    public RGBColor color() {
+    public Color color() {
         return m_color ;
     }
 
@@ -33,9 +34,9 @@ public class PointLight {
     /*
      * intersection a valid intersection between a ray and a triangle
      */
-    virtual RGBColor color(RayTriangleIntersection intersection)
+    virtual Color color(RayTriangleIntersection intersection)
     {
         System.out.println("PointLight::color Not implemented [TODO]") ;
-        return RGBColor(0,1,0) ;
+        return Color(0,1,0) ;
     }
 }
