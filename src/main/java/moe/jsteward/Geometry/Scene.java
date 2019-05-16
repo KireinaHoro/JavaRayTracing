@@ -1,15 +1,12 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.image.PixelWriter;
 import moe.jsteward.Geometry.BoundingBox;
 
-import java.util.Arrays;
-import java.util.Vector;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
-
 import javafx.scene.paint.Color;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -18,7 +15,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  * an instance of geometry scene that can be rendered with ray casting.
  */
 public class Scene {
-    public Color visuBuffer[][];
+    private PixelWriter pw;
+    private int imgYRange, imgXRange;
+
     private List<MutablePair<BoundingBox, Geometry>> m_geometries
             = new LinkedList<MutablePair<BoundingBox, Geometry>>();
     private List<PointLight> m_lights;
@@ -42,8 +41,10 @@ public class Scene {
     /**
      * Constructor.
      */
-    public Scene(Color[][] _visuBuffer) {
-        visuBuffer = _visuBuffer;
+    public Scene(final PixelWriter _pw, final int _imgXRange, final int _imgYRange) {
+        pw = _pw;
+        imgXRange = _imgXRange;
+        imgYRange = _imgYRange;
         m_diffuseSamples = 30;
         m_specularSamples = 30;
         m_lightSamples = 0;
@@ -71,28 +72,28 @@ public class Scene {
     /**
      * sets number of diffuse samples.
      */
-    public void setDiffuseSamples(int num) {
+    public void setDiffuseSamples(final int num) {
         m_diffuseSamples = num;
     }
 
     /**
      * sets number of specular samples.
      */
-    public void setSpecularSamples(int num) {
+    public void setSpecularSamples(final int num) {
         m_specularSamples = num;
     }
 
     /**
      * sets number of light samples.
      */
-    public void setLightSamples(int num) {
+    public void setLightSamples(final int num) {
         m_lightSamples = num;
     }
 
     /**
      * adds a geometry to this Scene.
      */
-    public void add(Geometry geometry) {
+    public void add(final Geometry geometry) {
         if (geometry.getVertices().isEmpty()) return;
         BoundingBox box = new BoundingBox(geometry);
         m_geometries.add(new MutablePair<BoundingBox, Geometry>(box, geometry));
@@ -107,14 +108,14 @@ public class Scene {
     /**
      * adds a point light to this Scene.
      */
-    public void add(PointLight light) {
+    public void add(final PointLight light) {
         m_lights.add(light);
     }
 
     /**
      * sets the camera.
      */
-    public void setCamera(Camera cam) {
+    public void setCamera(final Camera cam) {
         m_camera = cam;
     }
 
@@ -125,7 +126,7 @@ public class Scene {
      * @param node current KDNode finding on. null implies the whole kdTree.
      * @return the RayTriangleIntersection needed.
      */
-    private RayTriangleIntersection getIntersection(Ray ray, KDNode node) {
+    private RayTriangleIntersection getIntersection(final Ray ray, final KDNode node) {
         RayTriangleIntersection result = new RayTriangleIntersection();
         assert (kdTree != null);
         if (node == null) node = kdTree;
@@ -163,27 +164,27 @@ public class Scene {
         return result;
     }
 
-    private Color add(Color a, Color b) {
+    private Color add(final Color a, final Color b) {
         return new Color(a.getRed() + b.getRed(), a.getGreen() + b.getGreen(), a.getBlue() + b.getBlue(),
                 a.getOpacity());
     }
 
-    private Color multiply(Color a, Color b) {
+    private Color multiply(final Color a, final Color b) {
         return new Color(a.getRed() * b.getRed(), a.getGreen() * b.getGreen(), a.getBlue() * b.getBlue(),
                 a.getOpacity());
     }
 
-    private Color multiply(Color a, double b) {
+    private Color multiply(final Color a, final double b) {
         return new Color(a.getRed() * b, a.getGreen() * b, a.getBlue() * b,
                 a.getOpacity());
     }
 
-    private Color divide(Color a, double b) {
+    private Color divide(final Color a, final double b) {
         return new Color(a.getRed() / b, a.getGreen() / b, a.getBlue() / b,
                 a.getOpacity());
     }
 
-    private boolean isBlack(Color a) {
+    private boolean isBlack(final Color a) {
         return a.getRed() == 0.0 && a.getGreen() == 0.0 && a.getBlue() == 0.0;
     }
 
@@ -192,7 +193,7 @@ public class Scene {
     /**
      * sends a ray in this Scene, returns the computed Color.
      */
-    private Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
+    private Color sendRay(final Ray ray, int depth, final int maxDepth, final int diffuseSamples, final int specularSamples) {
         Color result = new Color(0, 0, 0, 1);
         // calculate intersection of current ray.
         RayTriangleIntersection intersection = getIntersection(ray, null);
@@ -283,6 +284,9 @@ public class Scene {
 
         // step on x and y for subpixel sampling
         double step = 1.0 / subPixelDivision;
+        List<Double> tempList = new LinkedList<Double>();
+        for (double xp = -0.5; xp < 0.5; xp += step) tempList.add(xp);
+        final List<Double> stepList = tempList;
         // Table accumulating values computed per pixel (enable rendering of each pass)
         // TODO somehow strange...
         //Vector<Vector<MutablePair<Integer, Color>>> pixelTable =
@@ -300,51 +304,15 @@ public class Scene {
         m_pass = 0;
         // Rendering
         for (int passPerPixelCounter = 0; passPerPixelCounter < passPerPixel; ++passPerPixelCounter) {
-            for (double xp = -0.5; xp < 0.5; xp += step) {
-                for (double yp = -0.5; yp < 0.5; yp += step) {
+            for (final double yp : stepList) {
+                for (final double xp : stepList) {
                     System.out.println("Pass" + m_pass + "/" + (passPerPixel * subPixelDivision * subPixelDivision));
                     ++m_pass;
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
                     // TODO Stream to be implemented...
 
-                    Arrays.stream(visuBuffer)
-                            .parallel()
-                            .map(visuRow -> IntStream.range(0, visuBuffer[0].length)
-                                    .mapToDouble(i -> IntStream.range(0, visuBuffer.length)
-                                            .map(j -> sendRay()
-                                            ).toArray()).toArray(double[][]::new);
-
-                    /*
-#pragma omp parallel for schedule(dynamic)//, 10)//guided)//dynamic)
-                    for (int y = 0; y < m_visu.height(); y++) {
-                        for (int x = 0; x < m_visu.width(); x++) {
-#pragma omp critical(visu)
-                            m_visu.plot(x, y, new Color(1000.0, 0.0, 0.0, 1));
-                            //TODO buffer Array to be implemented.
-// Ray casting
-                            Color result = sendRay(m_camera.getRay(((double) x + xp) / m_visu.width(), ((double) y + yp) / m_visu.height()), 0, maxDepth, m_diffuseSamples, m_specularSamples);
-                            // Accumulation of ray casting result in the associated pixel
-                            //MutablePair<Integer, Color> currentPixel = pixelTable.elementAt(x).elementAt(y);
-                            //currentPixel.left++;
-                            //currentPixel.right = add(result, currentPixel.right);
-                            // Pixel rendering (with simple tone mapping)
-#pragma omp critical(visu)
-                            m_visu.plot(x, y, divide(pixelTable.elementAt(x).elementAt(y).right,
-                                    (double) (pixelTable.elementAt(x).elementAt(y).left) * 10));
-                            //TODO buffer Array to be implemented.
-                            // Updates the rendering context (per pixel) - warning per pixel update can be costly...
-//#pragma omp critical (visu)
-                            //m_visu.update();
-                        }
-                        // Updates the rendering context (per line)
-#pragma omp critical(visu)
-                        m_visu.update();
-                        //TODO buffer Array to be implemented.
-                    }
-                    */
-                    // Updates the rendering context (per pass)
-                    //m_visu.update();
-                    // We print time for each pass
+                    IntStream.range(0, imgXRange).forEach(x -> IntStream.range(0, imgYRange).parallel().forEach(y -> pw.setColor(x, y,
+                            sendRay(m_camera.getRay(((double) x + xp) / imgXRange, ((double) y + yp) / imgYRange), 0, maxDepth, m_diffuseSamples, m_specularSamples))));
                     t2 = System.currentTimeMillis();
                     elapsedTime = (double) (t2 - t1);
                     double remainingTime = (elapsedTime / m_pass) * (passPerPixel * subPixelDivision * subPixelDivision - m_pass);

@@ -169,7 +169,7 @@ public class Camera {
      *  \param1	coordX :=  X coordinate in the projection rectangle.
      *  \param2	coordY :=  Y coordinate in the projection rectangle.
      */
-    Ray getRay(double coordX, double coordY) {
+    Ray getRay(final double coordX, final double coordY) {
         return new Ray(m_position, m_widthVector.scalarMultiply(coordX).add(m_upLeftPoint).add(m_heightVector.scalarMultiply(coordY)).subtract(m_position));
     }
 }
