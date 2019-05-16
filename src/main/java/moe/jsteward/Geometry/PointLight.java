@@ -15,7 +15,7 @@ public class PointLight {
      */
     public PointLight(Vector3D position, Color color ){
         position = new Vector3D(0.0,0.0,0.0);
-        color = Color();
+        color = new Color(0,0,0,1);
         m_position=position;
         m_color=color;
     }
@@ -40,6 +40,6 @@ public class PointLight {
     virtual Color color(RayTriangleIntersection intersection)
     {
         System.out.println("PointLight::color Not implemented [TODO]") ;
-        return Color(0,1,0) ;
+        return new Color(0,0,0,1) ;
     }
 }

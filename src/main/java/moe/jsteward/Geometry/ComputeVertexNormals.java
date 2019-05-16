@@ -1,16 +1,21 @@
 package moe.jsteward.Geometry;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import javafx.scene.paint.Color;
 
+import java.lang.reflect.Array;
+import java.util.*;
+
 public class ComputeVertexNormals {
     protected
-    pair<Vector3D , Vector3D > makepair<Vector3D , Vector3D >(Vector3D v1, Vector3D  v2) {
-        return make_pair(min(v1, v2), max(v1, v2));
+    MutablePair<Vector3D , Vector3D > makeEdge(Vector3D v1, Vector3D v2) {
+        MutablePair<Vector3D , Vector3D > temp = new MutablePair<Vector3D , Vector3D >(min(v1, v2), max(v1, v2));
+            return temp;
     }
     Vector<Triangle> m_triangles;
-    map<pair<Vector3D , Vector3D >, Vector<size_t>> m_edgeToTriangle;/* size_t need todo*/
-    Vector<Vector<size_t>> m_groups;
+    Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> m_edgeToTriangle;/* Integer need todo*/
+    Vector<Vector<Integer>> m_groups;
 
     /*
      * Constructor
@@ -24,8 +29,8 @@ public class ComputeVertexNormals {
      *
      */
     public void compute(double cosLimit) {
-        computepair<Vector3D , Vector3D >ToTriangle();
-        filterpair<Vector3D , Vector3D >s(cosLimit);
+        computeEdgeToTriangle();
+        filterEdges(cosLimit);
         computeGroups();
         computeNormalsForGroups();
         ensure(cosLimit);
@@ -35,122 +40,126 @@ public class ComputeVertexNormals {
      * auto need todo
      */
     void computeNormalsForGroups(){
-        for (auto it = m_groups.begin(), end = m_groups.end(); it != end; ++it)
-        {
-            computeNormalsForGroup(*it);
+        for (Vector<Integer> it: m_groups) {
+            computeNormalsForGroup(it);
         }
     }
     /*
      * Computes the per vertex normals for a given groups of triangles
      * auto need todo
      */
-    void computeNormalsForGroup(Vector<size_t> group) {
-        // We create a map accumulating the sum of the normals
-        map<Vector3D , Vector3D> m_normals;
-        for (auto it = group.begin(), end = group.end(); it != end; ++it) {
-            size_t current = it;
-            Triangle triangle = m_triangles[current];
+    void computeNormalsForGroup(Vector<Integer> group) {
+        // We create a Map accumulating the sum of the normals
+        Map<Vector3D , Vector3D> m_normals;
+        for (Integer it: group) {
+            Integer current = it;
+            Triangle triangle = m_triangles.elementAt(current);
             for (int i = 0; i < 3; ++i) {
                 m_normals[triangle.vertex(i)] += triangle.normal();
             }
         }
         // We set the normals of the triangles belonging to the group
-        for(auto it=group.begin(), end=group.end() ; it!=end ; ++it) {
-            Triangle triangle = m_triangles[it];//**it;
-            for (size_t i = 0; i < 3; ++i) {
-                auto found = m_normals.find(triangle.vertex(i));
-                if (found != m_normals.end()) {
-                    triangle.setVertexNormal(i, found.second.normalized());
+        for(Integer it: group) {
+            Triangle triangle = m_triangles.elementAt(it);//**it;
+            for (Integer i = 0; i < 3; ++i) {
+                Vector3D found = m_normals.get(triangle.vertex(i));
+                if (found != null) {
+                    //Map<Integer,Integer> a=new Map<Integer,Integer>;
+                    triangle.setVertexNormal(i, found.normalized());
                 }
             }
         }
     }
     /*
-     * Computes the groups of triangles based on the edge to triangle map
+     * Computes the groups of triangles based on the edge to triangle Map
      * Pointer need todo
      */
     void computeGroups() {
         // 1- We compute the triangle adjency graph.
-        Vector<Vector<size_t>> graph(m_triangles.size());
-        for (auto it = m_edgeToTriangle.begin(), end = m_edgeToTriangle.end(); it != end; ++it)
+        Vector<Vector<Integer>> graph = new Vector<Vector<Integer>>(m_triangles.size());
+        for (Vector<Integer> it : m_edgeToTriangle.values())
         {
-				Vector<size_t> triangles = it.second;
-            graph[triangles[0]].push_back(triangles[1]);
-            graph[triangles[1]].push_back(triangles[0]);
+            Vector<Integer> triangles = (it);
+            graph.elementAt(triangles.elementAt(1)).add(triangles.elementAt(1));
+            graph.elementAt(triangles.elementAt(0)).add(triangles.elementAt(0));
         }
 
         // 2 - We compute the connected components.
-			Vector<bool> explored(m_triangles.size(), false);
-			Vector<size_t> toExplore;
-        for (size_t cpt = 0; cpt < graph.size() ; ++cpt)
+        Vector<Boolean> explored = new Vector<Boolean>(m_triangles.size());/* maybe need init to false */
+		Vector<Integer> toExplore;
+        for (Integer cpt = 0; cpt < graph.size() ; ++cpt)
         {
-            if (explored[cpt]) { continue; }
-            m_groups.push_back(Vector<size_t>());
-            toExplore.push_back(cpt);
-            while (!toExplore.empty())
-            {
-                size_t current = toExplore.back();
-                toExplore.pop_back();
-                if (explored[current]) { continue; }
-                explored[current] = true;
-                m_groups.back().push_back(current);
-                copy(graph[current].begin(), graph[current].end(), back_inserter(toExplore));/* copy need todo */
+            if (explored.elementAt(cpt) == true) { continue; }
+            m_groups.add(new Vector<Integer>());
+            toExplore.add(cpt);
+            while (!toExplore.isEmpty()) {
+                Integer current = toExplore.lastElement();
+                toExplore.remove(toExplore.lastElement());/*pop_back() */
+                if (explored.elementAt(current)) { continue; }
+                explored.setElementAt(true,current);
+                m_groups.lastElement().add(current);
+                toExplore.addAll(graph.elementAt(current));
             }
         }
     }
 
     /*
      * Computes the edge to triangle map
-     * need todo
      */
-    void computepair<Vector3D , Vector3D >ToTriangle() {
-        for (size_t cpt=0 ; cpt<m_triangles.size() ; ++cpt) {
-            Triangle triangle = m_triangles[cpt];
-            for(size_t i=0; i<3 ; ++i) {
-                m_edgeToTriangle[makepair<Vector3D , Vector3D >(triangle.vertex(i), triangle.vertex((i+1)%3))].push_back(cpt);
+    void computeEdgeToTriangle() {
+        for (Integer cpt=0 ; cpt<m_triangles.size() ; ++cpt)
+        {
+            Triangle triangle = m_triangles.elementAt(cpt);
+            for(Integer i=0; i<3 ; ++i)
+            {
+                m_edgeToTriangle.get(makeEdge(triangle.vertex(i), triangle.vertex((i+1)%3))).add(cpt);
             }
         }
     }
 
     /*
-     * Filters the edge to triangle map by removing edges shared by triangles for which the dot product
+     * Filters the edge to triangle Map by removing edges shared by triangles for which the dot product
      * of normals is lower than the given threshold
      */
-    void filterpair<Vector3D , Vector3D >s(double cosLimit)
+
+    void filterEdges(double cosLimit)
     {
-        Vector<map<pair<Vector3D , Vector3D >, Vector<size_t>>iterator> toRemove;
-        Vector<size_t> trianglesToRemove;
-        for (auto it = m_edgeToTriangle.begin(), end = m_edgeToTriangle.end(); it != end; ++it) {
-			Vector<size_t> triangles = it.second;
+        Vector<Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> toRemove;
+        Vector<Integer> trianglesToRemove;
+        Iterator<Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> it = m_edgeToTriangle.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> entry = it.next();
+			Vector<Integer> triangles = entry.getValue();
             if (triangles.size() < 2 ) {
-                toRemove.push_back(it);
+                toRemove.add(entry.getKey(),entry.getValue());
             }
             else if (triangles.size() == 2) {
-                if (m_triangles[triangles[0]].normal() * m_triangles[triangles[1]].normal() < cosLimit) {
-                    toRemove.push_back(it);
+                if (m_triangles.elementAt(triangles.elementAt(0)).normal() * m_triangles.elementAt(triangles.elementAt(1)).normal() < cosLimit) {
+                    toRemove.add(entry.getKey(),entry.getValue());
                 }
             }
             else {
-                toRemove.push_back(it);
-				copy(it.second.begin(), it.second.end(), back_inserter(trianglesToRemove));
+                toRemove.add(it);
+                trianglesToRemove.addAll(m_edgeToTriangle);
             }
         }
-        for (auto it = toRemove.begin(), end = toRemove.end(); it != end; ++it) {
-            m_edgeToTriangle.erase(*it);
+        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : toRemove) {
+            m_edgeToTriangle.remove(it);
         }
         toRemove.clear();
-		sort(trianglesToRemove.begin(), trianglesToRemove.end());
-        trianglesToRemove.erase(unique(trianglesToRemove.begin(), trianglesToRemove.end()), trianglesToRemove.end());
-        for (auto it = m_edgeToTriangle.begin(), end = m_edgeToTriangle.end(); it != end; ++it) {
-            if (binary_search(trianglesToRemove.begin(), trianglesToRemove.end(), it.second[0])) {
-                toRemove.push_back(it);
+        Collections.sort(trianglesToRemove);
+        Set<Integer> tempset = new HashSet<Integer>(trianglesToRemove);
+        trianglesToRemove = new Vector<Integer>(tempset);
+        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : m_edgeToTriangle) {
+            if (Arrays.binarySearch(trianglesToRemove.toArray(), m_edgeToTriangle.get(it).elementAt(0)) != -1) {
+                toRemove.add(it);
             }
-				else if (binary_search(trianglesToRemove.begin(), trianglesToRemove.end(), it.second[1])) {
-                toRemove.push_back(it);
+				else if (Arrays.binarySearch(trianglesToRemove.toArray(), m_edgeToTriangle.get(it).elementAt(1)) != -1) {
+                toRemove.add(it);
             }
         }
-        for (auto it = toRemove.begin(), end = toRemove.end(); it != end; ++it) {
-            m_edgeToTriangle.erase(*it);
+        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : toRemove) {
+            m_edgeToTriangle.remove(it);
         }
     }
 
@@ -159,8 +168,8 @@ public class ComputeVertexNormals {
      */
     void ensure(double cosLimit)
     {
-        for (auto it = m_triangles.begin(), end = m_triangles.end(); it != end; ++it) {
-            Triangle triangle = (**it);
+        for (Triangle it : m_triangles) {
+            Triangle triangle = (it);
             // If the angle between normals is greater that the threshold, we reset the per vertex normals to the triangle normal
             if (triangle.getVertexNormal(0)*triangle.getVertexNormal(1) < cosLimit ||
                     triangle.getVertexNormal(1)*triangle.getVertexNormal(2) < cosLimit ||
