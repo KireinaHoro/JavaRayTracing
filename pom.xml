@@ -8,6 +8,27 @@
     <artifactId>JavaRayTracing</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>imagej-public</id>
+            <url>http://maven.imagej.net/content/repositories/public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.github.jnr</groupId>
@@ -23,8 +44,17 @@
 
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math</artifactId>
+            <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
+        </dependency>
+
+        <!--
+        install:install-file -Dfile=src/main/resources/jim3dsModelImporterJFX.jar -Dgenerate-pom=true -DgroupId=com.interactivemesh.jfx -DartifactId=importer.tds -Dversion=0.7 -Dpackaging=jar
+        -->
+        <dependency>
+            <groupId>com.interactivemesh.jfx</groupId>
+            <artifactId>importer.tds</artifactId>
+            <version>0.7</version>
         </dependency>
     </dependencies>
 
