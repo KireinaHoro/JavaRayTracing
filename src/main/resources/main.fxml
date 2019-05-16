@@ -7,10 +7,9 @@
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
     <Label GridPane.rowIndex="0" fx:id="greetingLabel" text="Welcome to the Java Ray Tracer"/>
     <HBox spacing="10" alignment="BOTTOM_CENTER" GridPane.rowIndex="1">
-        <TextField fx:id="widthField"/>
-        <TextField fx:id="heightField"/>
+        <TextField fx:id="widthField" promptText="Width"/>
+        <TextField fx:id="heightField" promptText="Height"/>
     </HBox>
     <Canvas GridPane.rowIndex="2" fx:id="canvas"/>
     <Button GridPane.rowIndex="3" text="Choose Model File" onAction="#chooseModelFile"/>
-
 </GridPane>
