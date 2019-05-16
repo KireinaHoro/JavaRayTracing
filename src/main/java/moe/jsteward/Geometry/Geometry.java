@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Vector;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.complex.Quaternion;
@@ -289,11 +290,11 @@ public class Geometry {
     public void computeVertexNormals(double angle) {
         // TODO
         double cosAngleLimit = Math.cos(angle);
-        List<Triangle> triangles = new LinkedList<Triangle>();
+        Vector<Triangle> triangles = new Vector<Triangle>();
         for (Triangle triangle : m_triangles) {
             triangles.add(triangle);
         }
-        ComputeVertexNormals normalsComputation (triangles);
+        ComputeVertexNormals normalsComputation = new ComputeVertexNormals(triangles);
         normalsComputation.compute(cosAngleLimit);
     }
 }
