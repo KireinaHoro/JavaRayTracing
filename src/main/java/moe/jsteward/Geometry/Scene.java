@@ -152,10 +152,36 @@ public class Scene {
         return result;
     }
 
+    private Color add(Color a, Color b) {
+        return new Color(a.getRed() + b.getRed(), a.getGreen() + b.getGreen(), a.getBlue() + b.getBlue(),
+                a.getOpacity());
+    }
+
+    private Color multiply(Color a, Color b) {
+        return new Color(a.getRed() * b.getRed(), a.getGreen() * b.getGreen(), a.getBlue() * b.getBlue(),
+                a.getOpacity());
+    }
+
+    private Color multiply(Color a, double b) {
+        return new Color(a.getRed() * b, a.getGreen() * b, a.getBlue() * b,
+                a.getOpacity());
+    }
+
+    private Color divide(Color a, double b) {
+        return new Color(a.getRed() / b, a.getGreen() / b, a.getBlue() / b,
+                a.getOpacity());
+    }
+
+    private boolean isBlack(Color a) {
+        return a.getRed() == 0.0 && a.getGreen() == 0.0 && a.getBlue() == 0.0;
+    }
+
+
+
     /**
      * sends a ray in this Scene, returns the computed Color.
      */
-    Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
+    public Color sendRay(Ray ray, int depth, int maxDepth, int diffuseSamples, int specularSamples) {
         Color result = new Color(0, 0, 0, 1);
         // calculate intersection of current ray.
         RayTriangleIntersection intersection = getIntersection(ray, null);
@@ -168,12 +194,12 @@ public class Scene {
         Triangle triangle = intersection.triangle();
         Material material = triangle.material();
         // TODO types
-        Object diffuse = material.getDiffuse();
-        Object specular = material.getSpecular();
-        double shininess = material.getShiniess();
+        Color diffuse = material.getDiffuse();
+        Color specular = material.getSpecular();
+        double shininess = material.getShininess();
         Vector3D normal = triangle.sampleNormal(intersection.uTriangleValue(),
                 intersection.vTriangleValue(), ray.source());
-        Vector3D reflection = triangle.reflectionDirection(normal, ray.direction()).normalize();
+        Vector3D reflection = Triangle.reflectionDirection(normal, ray.direction()).normalize();
         // for each light source
         for (PointLight light : m_lights) {
             Vector3D lightRay = light.position().subtract(intersectionPoint);
@@ -188,28 +214,28 @@ public class Scene {
                     continue;
             }
             // ambient and emissive lighting -- phong part 1
-            result = result.add(material.getAmbient()).add(material.getEmissive());
+            result = add(add(result, material.getAmbient()), material.getEmissive());
             // diffuse and specular lighting -- phong part 2
             // diffuse : result =
             //result + diffuse * (normal * lightRay) * light.color() / distance;
             if (normal.dotProduct(lightRay) > 0)
-                result = result.add(
-                        light.color().multiply(
-                                diffuse.multiply(normal.dotProduct(lightRay)).divide(distance)));
+                result = add(result,
+                        multiply(light.color(),
+                                divide(multiply(diffuse, normal.dotProduct(lightRay)), distance)));
             // specular : result =
             //result + specular * pow(reflection * lightRay, shininess) * light.color() / distance;
             if (reflection.dotProduct(lightRay) > 0)
-                result = result.add(
-                        specular.multiply(Math.pow(reflection.dotProduct(lightRay), shininess)).multiply(
+                result = add(result,
+                        divide(multiply(multiply(specular, Math.pow(reflection.dotProduct(lightRay), shininess)),
                                 light.color()
-                        ).divide(distance)
+                        ), distance)
                 );
         }
 
-        if (depth < maxDepth && !specular.isBlack()) {
+        if (depth < maxDepth && !isBlack(specular)) {
             // ray bouncing : send new ray
-            result = result.add(
-                    specular.multiply(
+            result = add(result,
+                    multiply(specular,
                             sendRay(
                                     new Ray(intersectionPoint, reflection),
                                     depth + 1, maxDepth, diffuseSamples, specularSamples
@@ -219,7 +245,7 @@ public class Scene {
         }
         // texture for intersection point
         if (material.hasTexture()) {
-            result = result.multiply(
+            result = multiply(result,
                     triangle.sampleTexture(intersection.uTriangleValue(), intersection.vTriangleValue())
             );
         }
@@ -250,7 +276,7 @@ public class Scene {
         // TODO somehow strange...
         Vector<Vector<MutablePair<Integer, Color>>> pixelTable =
                 new Vector<Vector<MutablePair<Integer, Color>>>
-                        (m_visu -> width(), new Vector<MutablePair<Integer, Color>>(m_visu -> width(), new MutablePair(0, new Color(0, 0, 0, 1))));
+                        (m_visu.width(), new Vector<MutablePair<Integer, Color>>(m_visu.width(), new MutablePair(0, new Color(0, 0, 0, 1))));
 
         // 1 - Rendering time
         long t1, t2;           // timeStamps
@@ -270,33 +296,33 @@ public class Scene {
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
                     // TODO Stream to be implemented...
 #pragma omp parallel for schedule(dynamic)//, 10)//guided)//dynamic)
-                    for (int y = 0; y < m_visu -> height(); y++) {
-                        for (int x = 0; x < m_visu -> width(); x++) {
+                    for (int y = 0; y < m_visu.height(); y++) {
+                        for (int x = 0; x < m_visu.width(); x++) {
 #pragma omp critical(visu)
-                            m_visu -> plot(x, y, new Color(1000.0, 0.0, 0.0, 1));
+                            m_visu.plot(x, y, new Color(1000.0, 0.0, 0.0, 1));
                             //TODO buffer Array to be implemented.
 // Ray casting
-                            Color result = sendRay(m_camera.getRay(((double) x + xp) / m_visu -> width(), ((double) y + yp) / m_visu -> height()), 0, maxDepth, m_diffuseSamples, m_specularSamples);
+                            Color result = sendRay(m_camera.getRay(((double) x + xp) / m_visu.width(), ((double) y + yp) / m_visu.height()), 0, maxDepth, m_diffuseSamples, m_specularSamples);
                             // Accumulation of ray casting result in the associated pixel
                             MutablePair<Integer, Color> currentPixel = pixelTable.elementAt(x).elementAt(y);
                             currentPixel.left++;
-                            currentPixel.right = currentPixel.right.add(result);
+                            currentPixel.right = add(result, currentPixel.right);
                             // Pixel rendering (with simple tone mapping)
 #pragma omp critical(visu)
-                            m_visu -> plot(x, y, pixelTable.elementAt(x).elementAt(y).right.
-                                    divide((double) (pixelTable.elementAt(x).elementAt(y).left) * 10));
+                            m_visu.plot(x, y, divide(pixelTable.elementAt(x).elementAt(y).right,
+                                    (double) (pixelTable.elementAt(x).elementAt(y).left) * 10));
                             //TODO buffer Array to be implemented.
                             // Updates the rendering context (per pixel) - warning per pixel update can be costly...
 //#pragma omp critical (visu)
-                            //m_visu->update();
+                            //m_visu.update();
                         }
                         // Updates the rendering context (per line)
 #pragma omp critical(visu)
-                        m_visu -> update();
+                        m_visu.update();
                         //TODO buffer Array to be implemented.
                     }
                     // Updates the rendering context (per pass)
-                    //m_visu->update();
+                    //m_visu.update();
                     // We print time for each pass
                     t2 = System.currentTimeMillis();
                     elapsedTime = (double) (t2 - t1);
