@@ -1,12 +1,13 @@
 package moe.jsteward.Geometry;
 
+import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import java.util.stream.IntStream;
 
 
 /**
@@ -17,7 +18,7 @@ public class Scene {
     private int imgYRange, imgXRange;
 
     private List<MutablePair<BoundingBox, Geometry>> m_geometries
-            = new LinkedList<MutablePair<BoundingBox, Geometry>>();
+            = new LinkedList<>();
     private List<PointLight> m_lights;
     private Camera m_camera;
     private BoundingBox m_sceneBoundingBox;
@@ -35,6 +36,7 @@ public class Scene {
         m_specularSamples = 30;
         m_lightSamples = 0;
     }
+
     /**
      * Constructor.
      */
@@ -93,7 +95,7 @@ public class Scene {
     public void add(final Geometry geometry) {
         if (geometry.getVertices().isEmpty()) return;
         BoundingBox box = new BoundingBox(geometry);
-        m_geometries.add(new MutablePair<BoundingBox, Geometry>(box, geometry));
+        m_geometries.add(new MutablePair<>(box, geometry));
         m_geometries.get(m_geometries.size() - 1).right.computeVertexNormals(Math.PI / 8.0);
         if (m_geometries.size() == 1) {
             m_sceneBoundingBox = box;
@@ -127,13 +129,13 @@ public class Scene {
         RayTriangleIntersection result = new RayTriangleIntersection();
         assert (kdTree != null);
         if (node == null) node = kdTree;
-        if (node.bbox.intersect(ray)) {
+        if (node.getBbox().intersect(ray)) {
             // the ray intersects with current bbox
-            if (node.left || node.right) {
+            if (node.getLeft() != null || node.getRight() != null) {
                 // internal node -- left/right child exists.
                 // NOTE -- one side exists implies another exists.
-                RayTriangleIntersection iL = getIntersection(ray, node.left);
-                RayTriangleIntersection iR = getIntersection(ray, node.right);
+                RayTriangleIntersection iL = getIntersection(ray, node.getLeft());
+                RayTriangleIntersection iR = getIntersection(ray, node.getRight());
                 if (iL.valid() && iR.valid()) {
                     if (iL.tRayValue() > iR.tRayValue())
                         return iR;
@@ -147,7 +149,7 @@ public class Scene {
                 return result;
             } else {
                 // left node. make a direct lookup.
-                for (Triangle triangle : node.triangles()) {
+                for (Triangle triangle : node.getTriangles()) {
                     RayTriangleIntersection intersection =
                             new RayTriangleIntersection(triangle, ray);
                     if (intersection.valid() &&
@@ -165,7 +167,8 @@ public class Scene {
     /**
      * sends a ray in this Scene, returns the computed Color.
      */
-    private Color sendRay(final Ray ray, int depth, final int maxDepth, final int diffuseSamples, final int specularSamples) {
+    private Color sendRay(final Ray ray, int depth, final int maxDepth,
+                          final int diffuseSamples, final int specularSamples) {
         Color result = new Color(0, 0, 0, 1);
         // calculate intersection of current ray.
         RayTriangleIntersection intersection = getIntersection(ray, null);
@@ -253,7 +256,7 @@ public class Scene {
      */
     public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
         // build the kdTree
-        List<Triangle> listTriangle = new LinkedList<Triangle>();
+        List<Triangle> listTriangle = new LinkedList<>();
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {
             listTriangle.addAll(pair.right.getTriangles());
         }
@@ -265,7 +268,7 @@ public class Scene {
 
         // step on x and y for subpixel sampling
         double step = 1.0 / subPixelDivision;
-        List<Double> stepList = new LinkedList<Double>();
+        List<Double> stepList = new LinkedList<>();
         for (double xp = -0.5; xp < 0.5; xp += step) stepList.add(xp);
 
         // 1 - Rendering time
@@ -283,8 +286,11 @@ public class Scene {
                     System.out.println("Pass" + m_pass + "/" + (passPerPixel * subPixelDivision * subPixelDivision));
                     ++m_pass;
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
-                    IntStream.range(0, imgXRange).forEach(x -> IntStream.range(0, imgYRange).parallel().forEach(y -> pw.setColor(x, y,
-                            sendRay(m_camera.getRay(((double) x + xp) / imgXRange, ((double) y + yp) / imgYRange), 0, maxDepth, m_diffuseSamples, m_specularSamples))));
+                    IntStream.range(0, imgXRange).forEach(x -> IntStream.range(0, imgYRange).parallel()
+                            .forEach(y -> pw.setColor(x, y,
+                                    sendRay(m_camera.getRay(((double) x + xp) / imgXRange,
+                                            ((double) y + yp) / imgYRange), 0,
+                                            maxDepth, m_diffuseSamples, m_specularSamples))));
                     t2 = System.currentTimeMillis();
                     elapsedTime = (double) (t2 - t1);
                     double remainingTime = (elapsedTime / m_pass) * (passPerPixel * subPixelDivision * subPixelDivision - m_pass);
