@@ -1,20 +1,22 @@
 package moe.jsteward.Geometry;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import javafx.scene.paint.Color;
+
 public class ComputeVertexNormals {
     protected
-    typedef pair<Vector3f , Vector3f > Edge;/* typedef need todo */
-    Edge makeEdge(Vector3f v1, Vector3f  v2) {
+    pair<Vector3D , Vector3D > makepair<Vector3D , Vector3D >(Vector3D v1, Vector3D  v2) {
         return make_pair(min(v1, v2), max(v1, v2));
     }
-    vector<Triangle> m_triangles;
-    map<Edge, vector<size_t>> m_edgeToTriangle;/* size_t need todo*/
-    vector<vector<size_t>> m_groups;
+    Vector<Triangle> m_triangles;
+    map<pair<Vector3D , Vector3D >, Vector<size_t>> m_edgeToTriangle;/* size_t need todo*/
+    Vector<Vector<size_t>> m_groups;
 
     /*
      * Constructor
      * Author Louis
      */
-    public ComputeVertexNormals(vector<Triangle> triangles) {
+    public ComputeVertexNormals(Vector<Triangle> triangles) {
         m_triangles = triangles;
     }
     /*
@@ -22,8 +24,8 @@ public class ComputeVertexNormals {
      *
      */
     public void compute(double cosLimit) {
-        computeEdgeToTriangle();
-        filterEdges(cosLimit);
+        computepair<Vector3D , Vector3D >ToTriangle();
+        filterpair<Vector3D , Vector3D >s(cosLimit);
         computeGroups();
         computeNormalsForGroups();
         ensure(cosLimit);
@@ -42,9 +44,9 @@ public class ComputeVertexNormals {
      * Computes the per vertex normals for a given groups of triangles
      * auto need todo
      */
-    void computeNormalsForGroup(vector<size_t> group) {
+    void computeNormalsForGroup(Vector<size_t> group) {
         // We create a map accumulating the sum of the normals
-        map<Vector3f , Vector3f> m_normals;
+        map<Vector3D , Vector3D> m_normals;
         for (auto it = group.begin(), end = group.end(); it != end; ++it) {
             size_t current = it;
             Triangle triangle = m_triangles[current];
@@ -69,21 +71,21 @@ public class ComputeVertexNormals {
      */
     void computeGroups() {
         // 1- We compute the triangle adjency graph.
-        vector<vector<size_t>> graph(m_triangles.size());
+        Vector<Vector<size_t>> graph(m_triangles.size());
         for (auto it = m_edgeToTriangle.begin(), end = m_edgeToTriangle.end(); it != end; ++it)
         {
-				vector<size_t> triangles = it.second;
+				Vector<size_t> triangles = it.second;
             graph[triangles[0]].push_back(triangles[1]);
             graph[triangles[1]].push_back(triangles[0]);
         }
 
         // 2 - We compute the connected components.
-			vector<bool> explored(m_triangles.size(), false);
-			vector<size_t> toExplore;
+			Vector<bool> explored(m_triangles.size(), false);
+			Vector<size_t> toExplore;
         for (size_t cpt = 0; cpt < graph.size() ; ++cpt)
         {
             if (explored[cpt]) { continue; }
-            m_groups.push_back(vector<size_t>());
+            m_groups.push_back(Vector<size_t>());
             toExplore.push_back(cpt);
             while (!toExplore.empty())
             {
@@ -101,11 +103,11 @@ public class ComputeVertexNormals {
      * Computes the edge to triangle map
      * need todo
      */
-    void computeEdgeToTriangle() {
+    void computepair<Vector3D , Vector3D >ToTriangle() {
         for (size_t cpt=0 ; cpt<m_triangles.size() ; ++cpt) {
             Triangle triangle = m_triangles[cpt];
             for(size_t i=0; i<3 ; ++i) {
-                m_edgeToTriangle[makeEdge(triangle.vertex(i), triangle.vertex((i+1)%3))].push_back(cpt);
+                m_edgeToTriangle[makepair<Vector3D , Vector3D >(triangle.vertex(i), triangle.vertex((i+1)%3))].push_back(cpt);
             }
         }
     }
@@ -114,12 +116,12 @@ public class ComputeVertexNormals {
      * Filters the edge to triangle map by removing edges shared by triangles for which the dot product
      * of normals is lower than the given threshold
      */
-    void filterEdges(double cosLimit)
+    void filterpair<Vector3D , Vector3D >s(double cosLimit)
     {
-        vector<map<Edge, vector<size_t>>iterator> toRemove;
-        vector<size_t> trianglesToRemove;
+        Vector<map<pair<Vector3D , Vector3D >, Vector<size_t>>iterator> toRemove;
+        Vector<size_t> trianglesToRemove;
         for (auto it = m_edgeToTriangle.begin(), end = m_edgeToTriangle.end(); it != end; ++it) {
-			vector<size_t> triangles = it.second;
+			Vector<size_t> triangles = it.second;
             if (triangles.size() < 2 ) {
                 toRemove.push_back(it);
             }

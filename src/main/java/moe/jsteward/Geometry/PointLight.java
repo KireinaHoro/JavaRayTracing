@@ -1,17 +1,20 @@
 package moe.jsteward.Geometry;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import javafx.scene.paint.Color;
+
 /*
    need something import todo
  */
 public class PointLight {
-    Vector3f m_position ;
+    Vector3D m_position ;
     Color m_color ;
     /*
      *   author Louis
      *   Constructor
      */
-    public PointLight(Vector3f position, Color color ){
-        position = Vector3f.makeVector(0.0,0.0,0.0);
+    public PointLight(Vector3D position, Color color ){
+        position = new Vector3D(0.0,0.0,0.0);
         color = Color();
         m_position=position;
         m_color=color;
@@ -27,7 +30,7 @@ public class PointLight {
     /*
      *  get the direction
      */
-    public Vector3f position() {
+    public Vector3D position() {
         return m_position ;
     }
 
