@@ -7,39 +7,57 @@ import javafx.scene.paint.Color;
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class ComputeVertexNormals {
-    protected
-    MutablePair<Vector3D , Vector3D > makeEdge(Vector3D v1, Vector3D v2) {
-        MutablePair<Vector3D , Vector3D > temp = new MutablePair<Vector3D , Vector3D >(min(v1, v2), max(v1, v2));
-            return temp;
+class ComputeVertexNormals {
+
+    private Vector3D min(Vector3D a, Vector3D b) {
+        if ((a.getX() < b.getX())
+                || (a.getX() == b.getX() && a.getY() < b.getY())
+                || (a.getX() == b.getX() && a.getY() == b.getY() && a.getZ() < b.getZ()))
+            return a;
+        else
+            return b;
     }
-    Vector<Triangle> m_triangles;
-    Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> m_edgeToTriangle;/* Integer need todo*/
-    Vector<Vector<Integer>> m_groups;
+
+    private Vector3D max(Vector3D a, Vector3D b) {
+        if ((a.getX() > b.getX())
+                || (a.getX() == b.getX() && a.getY() > b.getY())
+                || (a.getX() == b.getX() && a.getY() == b.getY() && a.getZ() > b.getZ()))
+            return a;
+        else
+            return b;
+    }
+
+    private MutablePair<Vector3D, Vector3D> makeEdge(Vector3D v1, Vector3D v2) {
+        return new MutablePair<Vector3D, Vector3D>(min(v1, v2), max(v1, v2));
+    }
+
+    private Vector<Triangle> m_triangles;
+    private Map<MutablePair<Vector3D, Vector3D>, Vector<Integer>> m_edgeToTriangle;/* Integer need todo*/
+    private Vector<Vector<Integer>> m_groups;
 
     /*
      * Constructor
      * Author Louis
      */
-    public ComputeVertexNormals(Vector<Triangle> triangles) {
+    ComputeVertexNormals(Vector<Triangle> triangles) {
         m_triangles = triangles;
     }
     /*
      * Compute something?
      *
      */
-    public void compute(double cosLimit) {
+    void compute(double cosLimit) {
         computeEdgeToTriangle();
         filterEdges(cosLimit);
         computeGroups();
         computeNormalsForGroups();
         ensure(cosLimit);
     }
-    protected
+
     /*
      * auto need todo
      */
-    void computeNormalsForGroups(){
+    private void computeNormalsForGroups() {
         for (Vector<Integer> it: m_groups) {
             computeNormalsForGroup(it);
         }
@@ -48,24 +66,24 @@ public class ComputeVertexNormals {
      * Computes the per vertex normals for a given groups of triangles
      * auto need todo
      */
-    void computeNormalsForGroup(Vector<Integer> group) {
+    private void computeNormalsForGroup(Vector<Integer> group) {
         // We create a Map accumulating the sum of the normals
-        Map<Vector3D , Vector3D> m_normals;
+        Map<Vector3D, Vector3D> m_normals = new HashMap<>();
         for (Integer it: group) {
-            Integer current = it;
-            Triangle triangle = m_triangles.elementAt(current);
+            Triangle triangle = m_triangles.elementAt(it);
             for (int i = 0; i < 3; ++i) {
-                m_normals[triangle.vertex(i)] += triangle.normal();
+                m_normals.replace(triangle.vertex(i),
+                        m_normals.get(triangle.vertex(i)).add(triangle.normal()));
             }
         }
         // We set the normals of the triangles belonging to the group
         for(Integer it: group) {
             Triangle triangle = m_triangles.elementAt(it);//**it;
-            for (Integer i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 Vector3D found = m_normals.get(triangle.vertex(i));
                 if (found != null) {
                     //Map<Integer,Integer> a=new Map<Integer,Integer>;
-                    triangle.setVertexNormal(i, found.normalized());
+                    triangle.setVertexNormal(i, found.normalize());
                 }
             }
         }
@@ -74,26 +92,27 @@ public class ComputeVertexNormals {
      * Computes the groups of triangles based on the edge to triangle Map
      * Pointer need todo
      */
-    void computeGroups() {
+    private void computeGroups() {
         // 1- We compute the triangle adjency graph.
         Vector<Vector<Integer>> graph = new Vector<Vector<Integer>>(m_triangles.size());
         for (Vector<Integer> it : m_edgeToTriangle.values())
         {
-            Vector<Integer> triangles = (it);
-            graph.elementAt(triangles.elementAt(1)).add(triangles.elementAt(1));
-            graph.elementAt(triangles.elementAt(0)).add(triangles.elementAt(0));
+            graph.elementAt(it.elementAt(1)).add(it.elementAt(1));
+            graph.elementAt(it.elementAt(0)).add(it.elementAt(0));
         }
 
         // 2 - We compute the connected components.
         Vector<Boolean> explored = new Vector<Boolean>(m_triangles.size());/* maybe need init to false */
-		Vector<Integer> toExplore;
-        for (Integer cpt = 0; cpt < graph.size() ; ++cpt)
+        Vector<Integer> toExplore = new Vector<>();
+        for (int cpt = 0; cpt < graph.size(); ++cpt)
         {
-            if (explored.elementAt(cpt) == true) { continue; }
+            if (explored.elementAt(cpt)) {
+                continue;
+            }
             m_groups.add(new Vector<Integer>());
             toExplore.add(cpt);
             while (!toExplore.isEmpty()) {
-                Integer current = toExplore.lastElement();
+                int current = toExplore.lastElement();
                 toExplore.remove(toExplore.lastElement());/*pop_back() */
                 if (explored.elementAt(current)) { continue; }
                 explored.setElementAt(true,current);
@@ -106,11 +125,11 @@ public class ComputeVertexNormals {
     /*
      * Computes the edge to triangle map
      */
-    void computeEdgeToTriangle() {
-        for (Integer cpt=0 ; cpt<m_triangles.size() ; ++cpt)
+    private void computeEdgeToTriangle() {
+        for (int cpt = 0; cpt < m_triangles.size(); ++cpt)
         {
             Triangle triangle = m_triangles.elementAt(cpt);
-            for(Integer i=0; i<3 ; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 m_edgeToTriangle.get(makeEdge(triangle.vertex(i), triangle.vertex((i+1)%3))).add(cpt);
             }
@@ -122,10 +141,10 @@ public class ComputeVertexNormals {
      * of normals is lower than the given threshold
      */
 
-    void filterEdges(double cosLimit)
+    private void filterEdges(double cosLimit)
     {
-        Vector<Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> toRemove;
-        Vector<Integer> trianglesToRemove;
+        Vector<Map.Entry<MutablePair<Vector3D, Vector3D>, Vector<Integer>>> toRemove = new Vector<>();
+        Vector<Integer> trianglesToRemove = new Vector<>();
         Iterator<Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> it = m_edgeToTriangle.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> entry = it.next();
@@ -134,16 +153,18 @@ public class ComputeVertexNormals {
                 toRemove.add(entry);
             }
             else if (triangles.size() == 2) {
-                if (m_triangles.elementAt(triangles.elementAt(0)).normal() * m_triangles.elementAt(triangles.elementAt(1)).normal() < cosLimit) {
+                if (m_triangles.elementAt(triangles.elementAt(0)).normal().dotProduct(m_triangles.elementAt(triangles.elementAt(1)).normal()) < cosLimit) {
                     toRemove.add(entry);
                 }
             }
             else {
                 toRemove.add(entry);
-                trianglesToRemove.addAll(m_edgeToTriangle);
+                for (Vector<Integer> vec : m_edgeToTriangle.values())
+                    trianglesToRemove.addAll(vec);
             }
         }
         for (Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it1 : toRemove) {
+            // TODO Cloud : i saw the warning... confusing...
             m_edgeToTriangle.remove(it1);
         }
         toRemove.clear();
@@ -168,23 +189,28 @@ public class ComputeVertexNormals {
     /*
      * Ensures that the cosine of the angle between normals of each triangle is greater than the given threshold
      */
-    void ensure(double cosLimit)
+    private void ensure(double cosLimit)
     {
-        for (Triangle it : m_triangles) {
-            Triangle triangle = (it);
+        for (Triangle triangle : m_triangles) {
             // If the angle between normals is greater that the threshold, we reset the per vertex normals to the triangle normal
-            if (triangle.getVertexNormal(0)*triangle.getVertexNormal(1) < cosLimit ||
-                    triangle.getVertexNormal(1)*triangle.getVertexNormal(2) < cosLimit ||
-                    triangle.getVertexNormal(0)*triangle.getVertexNormal(2) < cosLimit)
+            if (triangle.getVertexNormal(0).dotProduct(triangle.getVertexNormal(1)) < cosLimit ||
+                    triangle.getVertexNormal(1).dotProduct(triangle.getVertexNormal(2)) < cosLimit ||
+                    triangle.getVertexNormal(0).dotProduct(triangle.getVertexNormal(2)) < cosLimit)
             {
                 triangle.setVertexNormal(0, triangle.normal());
                 triangle.setVertexNormal(1, triangle.normal());
                 triangle.setVertexNormal(2, triangle.normal());
             }
             // If the norm of a normal is 0 (it should not be...), we reset it to the triangle normal.
-            if (triangle.getVertexNormal(0).norm() == 0.0) { triangle.setVertexNormal(0, triangle.normal()); }
-            if (triangle.getVertexNormal(1).norm() == 0.0) { triangle.setVertexNormal(1, triangle.normal()); }
-            if (triangle.getVertexNormal(2).norm() == 0.0) { triangle.setVertexNormal(2, triangle.normal()); }
+            if (triangle.getVertexNormal(0).getNorm() == 0.0) {
+                triangle.setVertexNormal(0, triangle.normal());
+            }
+            if (triangle.getVertexNormal(1).getNorm() == 0.0) {
+                triangle.setVertexNormal(1, triangle.normal());
+            }
+            if (triangle.getVertexNormal(2).getNorm() == 0.0) {
+                triangle.setVertexNormal(2, triangle.normal());
+            }
         }
     }
 

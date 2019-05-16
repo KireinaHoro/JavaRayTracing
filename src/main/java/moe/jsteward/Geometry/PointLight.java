@@ -7,13 +7,13 @@ import javafx.scene.paint.Color;
    need something import todo
  */
 public class PointLight {
-    Vector3D m_position ;
-    Color m_color ;
+    private Vector3D m_position;
+    private Color m_color;
     /*
      *   author Louis
      *   Constructor
      */
-    public PointLight(Vector3D position, Color color ){
+    PointLight(Vector3D position, Color color) {
         position = new Vector3D(0.0,0.0,0.0);
         color = new Color(0,0,0,1);
         m_position=position;
@@ -30,14 +30,14 @@ public class PointLight {
     /*
      *  get the direction
      */
-    public Vector3D position() {
+    Vector3D position() {
         return m_position ;
     }
 
     /*
      * intersection a valid intersection between a ray and a triangle
      */
-    virtual Color color(RayTriangleIntersection intersection)
+    Color color(RayTriangleIntersection intersection)
     {
         System.out.println("PointLight::color Not implemented [TODO]") ;
         return new Color(0,0,0,1) ;

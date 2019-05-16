@@ -1,8 +1,6 @@
 package moe.jsteward.Geometry;
 
 import javafx.scene.image.PixelWriter;
-import moe.jsteward.Geometry.BoundingBox;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -26,7 +24,6 @@ public class Scene {
     private int m_diffuseSamples;
     private int m_specularSamples;
     private int m_lightSamples;
-    private int m_pass;
     private LightSampler m_lightSampler;
     private KDNode kdTree;
 
@@ -57,7 +54,7 @@ public class Scene {
     public void printStats() {
         int numberTriangle = 0;
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {
-            numberTriangle += pair.right.m_triangles.size();
+            numberTriangle += pair.right.getTriangles().size();
         }
         System.out.println("Scene Stats : " + numberTriangle + "triangles...");
     }
@@ -126,7 +123,7 @@ public class Scene {
      * @param node current KDNode finding on. null implies the whole kdTree.
      * @return the RayTriangleIntersection needed.
      */
-    private RayTriangleIntersection getIntersection(final Ray ray, final KDNode node) {
+    private RayTriangleIntersection getIntersection(final Ray ray, KDNode node) {
         RayTriangleIntersection result = new RayTriangleIntersection();
         assert (kdTree != null);
         if (node == null) node = kdTree;
@@ -150,7 +147,7 @@ public class Scene {
                 return result;
             } else {
                 // left node. make a direct lookup.
-                for (Triangle triangle : node.triangles) {
+                for (Triangle triangle : node.triangles()) {
                     RayTriangleIntersection intersection =
                             new RayTriangleIntersection(triangle, ray);
                     if (intersection.valid() &&
@@ -163,31 +160,6 @@ public class Scene {
         }
         return result;
     }
-
-    private Color add(final Color a, final Color b) {
-        return new Color(a.getRed() + b.getRed(), a.getGreen() + b.getGreen(), a.getBlue() + b.getBlue(),
-                a.getOpacity());
-    }
-
-    private Color multiply(final Color a, final Color b) {
-        return new Color(a.getRed() * b.getRed(), a.getGreen() * b.getGreen(), a.getBlue() * b.getBlue(),
-                a.getOpacity());
-    }
-
-    private Color multiply(final Color a, final double b) {
-        return new Color(a.getRed() * b, a.getGreen() * b, a.getBlue() * b,
-                a.getOpacity());
-    }
-
-    private Color divide(final Color a, final double b) {
-        return new Color(a.getRed() / b, a.getGreen() / b, a.getBlue() / b,
-                a.getOpacity());
-    }
-
-    private boolean isBlack(final Color a) {
-        return a.getRed() == 0.0 && a.getGreen() == 0.0 && a.getBlue() == 0.0;
-    }
-
 
 
     /**
@@ -204,11 +176,10 @@ public class Scene {
 
         Vector3D intersectionPoint = intersection.intersection();
         Triangle triangle = intersection.triangle();
-        Material material = triangle.material();
-        // TODO types
-        Color diffuse = material.getDiffuse();
-        Color specular = material.getSpecular();
-        double shininess = material.getShininess();
+        PhongMaterialEx material = triangle.material();
+        Color diffuse = material.getDiffuseColor();
+        Color specular = material.getSpecularColor();
+        double shininess = material.getSpecularPower();
         Vector3D normal = triangle.sampleNormal(intersection.uTriangleValue(),
                 intersection.vTriangleValue(), ray.source());
         Vector3D reflection = Triangle.reflectionDirection(normal, ray.direction()).normalize();
@@ -226,28 +197,40 @@ public class Scene {
                     continue;
             }
             // ambient and emissive lighting -- phong part 1
-            result = add(add(result, material.getAmbient()), material.getEmissive());
+            // TODO those are default set to Color(0, 0, 0, 1)
+            result = StrangeMethods.add(
+                    StrangeMethods.add(result, new Color(0, 0, 0, 1)),
+                    new Color(0, 0, 0, 1));
             // diffuse and specular lighting -- phong part 2
             // diffuse : result =
             //result + diffuse * (normal * lightRay) * light.color() / distance;
             if (normal.dotProduct(lightRay) > 0)
-                result = add(result,
-                        multiply(light.color(),
-                                divide(multiply(diffuse, normal.dotProduct(lightRay)), distance)));
+                result = StrangeMethods.add(
+                        result,
+                        StrangeMethods.multiply(
+                                light.color(),
+                                StrangeMethods.divide(
+                                        StrangeMethods.multiply(diffuse, normal.dotProduct(lightRay)),
+                                        distance)));
             // specular : result =
             //result + specular * pow(reflection * lightRay, shininess) * light.color() / distance;
             if (reflection.dotProduct(lightRay) > 0)
-                result = add(result,
-                        divide(multiply(multiply(specular, Math.pow(reflection.dotProduct(lightRay), shininess)),
-                                light.color()
-                        ), distance)
+                result = StrangeMethods.add(
+                        result,
+                        StrangeMethods.divide(
+                                StrangeMethods.multiply(
+                                        StrangeMethods.multiply(
+                                                specular,
+                                                Math.pow(reflection.dotProduct(lightRay), shininess)),
+                                        light.color()),
+                                distance)
                 );
         }
 
-        if (depth < maxDepth && !isBlack(specular)) {
+        if (depth < maxDepth && !StrangeMethods.isBlack(specular)) {
             // ray bouncing : send new ray
-            result = add(result,
-                    multiply(specular,
+            result = StrangeMethods.add(result,
+                    StrangeMethods.multiply(specular,
                             sendRay(
                                     new Ray(intersectionPoint, reflection),
                                     depth + 1, maxDepth, diffuseSamples, specularSamples
@@ -256,8 +239,8 @@ public class Scene {
             );
         }
         // texture for intersection point
-        if (material.hasTexture()) {
-            result = multiply(result,
+        if (StrangeMethods.hasTexture(material)) {
+            result = StrangeMethods.multiply(result,
                     triangle.sampleTexture(intersection.uTriangleValue(), intersection.vTriangleValue())
             );
         }
@@ -272,9 +255,7 @@ public class Scene {
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<Triangle>();
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {
-            for (Triangle triangle : pair.right.getTriangles()) {
-                listTriangle.add(triangle);
-            }
+            listTriangle.addAll(pair.right.getTriangles());
         }
         kdTree = new KDNode(listTriangle, 0);
         // prepare lightSampler (stores triangles with a non null emissive component)
@@ -284,24 +265,17 @@ public class Scene {
 
         // step on x and y for subpixel sampling
         double step = 1.0 / subPixelDivision;
-        List<Double> tempList = new LinkedList<Double>();
-        for (double xp = -0.5; xp < 0.5; xp += step) tempList.add(xp);
-        final List<Double> stepList = tempList;
-        // Table accumulating values computed per pixel (enable rendering of each pass)
-        // TODO somehow strange...
-        //Vector<Vector<MutablePair<Integer, Color>>> pixelTable =
-        //        new Vector<Vector<MutablePair<Integer, Color>>>
-        //                (m_visu.width(), new Vector<MutablePair<Integer, Color>>(m_visu.width(), new MutablePair(0, new Color(0, 0, 0, 1))));
+        List<Double> stepList = new LinkedList<Double>();
+        for (double xp = -0.5; xp < 0.5; xp += step) stepList.add(xp);
 
         // 1 - Rendering time
         long t1, t2;           // timeStamps
         double elapsedTime;
-        // get ticks per second
 
         // start timer
         t1 = System.currentTimeMillis();
         // Rendering pass number
-        m_pass = 0;
+        int m_pass = 0;
         // Rendering
         for (int passPerPixelCounter = 0; passPerPixelCounter < passPerPixel; ++passPerPixelCounter) {
             for (final double yp : stepList) {
@@ -309,8 +283,6 @@ public class Scene {
                     System.out.println("Pass" + m_pass + "/" + (passPerPixel * subPixelDivision * subPixelDivision));
                     ++m_pass;
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
-                    // TODO Stream to be implemented...
-
                     IntStream.range(0, imgXRange).forEach(x -> IntStream.range(0, imgYRange).parallel().forEach(y -> pw.setColor(x, y,
                             sendRay(m_camera.getRay(((double) x + xp) / imgXRange, ((double) y + yp) / imgYRange), 0, maxDepth, m_diffuseSamples, m_specularSamples))));
                     t2 = System.currentTimeMillis();

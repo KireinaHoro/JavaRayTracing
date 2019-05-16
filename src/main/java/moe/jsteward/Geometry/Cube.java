@@ -9,7 +9,7 @@ public class Cube extends Geometry {
     /*
      *  Constructor for Cube
      */
-    public Cube(Material material) {
+    public Cube(PhongMaterialEx material) {
         Square sq0 = new Square(material);
         sq0.translate(new Vector3D(0.0, 0.0, 0.5));
         merge(sq0);
