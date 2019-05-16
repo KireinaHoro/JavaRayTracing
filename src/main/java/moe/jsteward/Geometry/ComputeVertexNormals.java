@@ -124,42 +124,44 @@ public class ComputeVertexNormals {
 
     void filterEdges(double cosLimit)
     {
-        Vector<Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> toRemove;
+        Vector<Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> toRemove;
         Vector<Integer> trianglesToRemove;
         Iterator<Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>>> it = m_edgeToTriangle.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> entry = it.next();
 			Vector<Integer> triangles = entry.getValue();
             if (triangles.size() < 2 ) {
-                toRemove.add(entry.getKey(),entry.getValue());
+                toRemove.add(entry);
             }
             else if (triangles.size() == 2) {
                 if (m_triangles.elementAt(triangles.elementAt(0)).normal() * m_triangles.elementAt(triangles.elementAt(1)).normal() < cosLimit) {
-                    toRemove.add(entry.getKey(),entry.getValue());
+                    toRemove.add(entry);
                 }
             }
             else {
-                toRemove.add(it);
+                toRemove.add(entry);
                 trianglesToRemove.addAll(m_edgeToTriangle);
             }
         }
-        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : toRemove) {
-            m_edgeToTriangle.remove(it);
+        for (Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it1 : toRemove) {
+            m_edgeToTriangle.remove(it1);
         }
         toRemove.clear();
         Collections.sort(trianglesToRemove);
         Set<Integer> tempset = new HashSet<Integer>(trianglesToRemove);
         trianglesToRemove = new Vector<Integer>(tempset);
-        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : m_edgeToTriangle) {
-            if (Arrays.binarySearch(trianglesToRemove.toArray(), m_edgeToTriangle.get(it).elementAt(0)) != -1) {
-                toRemove.add(it);
+        it = m_edgeToTriangle.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> entry = it.next();
+            if (Arrays.binarySearch(trianglesToRemove.toArray(),entry.getValue().elementAt(0) )!= -1){
+                toRemove.add(entry);
             }
-				else if (Arrays.binarySearch(trianglesToRemove.toArray(), m_edgeToTriangle.get(it).elementAt(1)) != -1) {
-                toRemove.add(it);
+				else if (Arrays.binarySearch(trianglesToRemove.toArray(), entry.getValue().elementAt(1)) != -1) {
+                toRemove.add(entry);
             }
         }
-        for (Map<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it : toRemove) {
-            m_edgeToTriangle.remove(it);
+        for (Map.Entry<MutablePair<Vector3D , Vector3D >, Vector<Integer>> it1 : toRemove) {
+            m_edgeToTriangle.remove(it1);
         }
     }
 
