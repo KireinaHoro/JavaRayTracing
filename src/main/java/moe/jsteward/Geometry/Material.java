@@ -1,6 +1,8 @@
 package moe.jsteward.Geometry;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import java.awt.*;
 
 public class Material {
     protected
@@ -10,20 +12,20 @@ public class Material {
     double    m_shininess ;
     Color m_emissiveColor ;
     String m_textureFile;
-    Texture  m_texture;/* Pointer need todo */
+    Texture  m_texture;
 
 
 
     /*
-     *  Constructor
+     *  Constructor1
      *  author Louis
      */
     public Material(Color ambientColor, Color diffuseColor, Color specularColor, double shininess, Color emissiveColor, String textureFile){
-        ambientColor = Color();
-        diffuseColor = Color();
-        specularColor = Color();
+        ambientColor = new Color(0,0,0,1);
+        diffuseColor = new Color(0,0,0,1);
+        specularColor = new Color(0,0,0,1);
         shininess = 1.0;
-        emissiveColor = Color();
+        emissiveColor = new Color(0,0,0,1);
         textureFile = "";
         m_ambientColor = ambientColor;
         m_diffuseColor = diffuseColor;
@@ -32,6 +34,22 @@ public class Material {
         m_emissiveColor = emissiveColor;
         m_textureFile = textureFile;
         m_texture = null;
+    }
+
+    /*
+     * need todo
+     */
+    public Material(PhongMaterial phongmaterial){
+        if(phongmaterial.getBumpMap() == null && phongmaterial.getdiffuseMap() == null &&
+           phongmaterial.getspecularMap() == null && phongmaterial.getselfIlluminationMap() == null) {
+            m_texture = null;
+        }
+        else m_texture = phongmaterial.getbumpMap() + phongmaterial.getdiffuseMap() + phongmaterial.getspecularMap() + phongmaterial.getselfIlluminationMap();
+        m_ambientColor = new Color(2,2,2 ,1);
+        m_diffuseColor = phongmaterial.getdiffuseColor();
+        m_specularColor = phongmaterial.getspecularColor();
+        m_emissiveColor = new Color(2,2,2,1);
+        m_shininess = phongmaterial.getspecularPower();
     }
 
     /*
@@ -134,7 +152,7 @@ public class Material {
 
     /*
      * Gets the texture
-     * need todo
+     *
      */
     public Texture getTexture() {
         return m_texture;
@@ -142,7 +160,7 @@ public class Material {
 
     /*
      * Tests if a texture is associated with this material
-     * need todo
+     *
      */
     Boolean hasTexture() {
         return m_texture != null;

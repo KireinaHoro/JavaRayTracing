@@ -51,7 +51,10 @@ public class Texture {
         return Color((double)(r) / 255.0f, (double)(g) / 255.0f, (double)(b) / 255.0f);
     }
 
+    /*
+     * is v[0]=v.getx()?
+     */
     public Color pixel(Vector2D v) {
-        return pixel((int)(v[0] * m_width), (int)(v[1] * m_height));
+        return pixel((int)(v.getX() * m_width), (int)(v.getY() * m_height));
     }
 }
