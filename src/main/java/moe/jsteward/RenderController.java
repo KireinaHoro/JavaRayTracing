@@ -89,7 +89,7 @@ public class RenderController {
             stringBuilder.append("Successfully loaded 3ds model file.")
                     .append(System.lineSeparator())
                     .append("Number of triangles: ")
-                    .append(geometryBuilder.toGeometry().getVertices().size())
+                    .append(geometryBuilder.toGeometry().getTriangles().size())
                     .append(System.lineSeparator());
 
             Alert alert = new Alert(AlertType.INFORMATION);
