@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RenderController {
     public Label greetingLabel;
@@ -70,36 +71,24 @@ public class RenderController {
 
         // start render worker
         Platform.runLater(() -> {
+            // TODO set options: GENERATE_NORMALS
             TdsModelImporter importer = new TdsModelImporter();
             importer.read(selectedFile);
 
-            StringBuilder stringBuilder = new StringBuilder();
+            scene = new Scene(image.getPixelWriter(), width, height);
             Node[] rootNodes = importer.getImport();
 
-            GeometryBuilder geometryBuilder = new GeometryBuilder();
+            AtomicInteger numberOfTriangles = new AtomicInteger();
             for (Node n : rootNodes) {
                 Utils.inspectNode(n);
                 Utils.recursiveProcessNode(n, n1 -> {
                     if (n1 instanceof MeshView) {
-                        geometryBuilder.add((MeshView) n1);
+                        Geometry geometry = new Geometry((MeshView) n1);
+                        numberOfTriangles.addAndGet(geometry.getTriangles().size());
+                        scene.add(geometry);
                     }
                 });
             }
-
-            stringBuilder.append("Successfully loaded 3ds model file.")
-                    .append(System.lineSeparator())
-                    .append("Number of triangles: ")
-                    .append(geometryBuilder.toGeometry().getTriangles().size())
-                    .append(System.lineSeparator());
-
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Load Model Results");
-            alert.setHeaderText(null);
-            alert.setContentText(stringBuilder.toString());
-            alert.showAndWait();
-
-            scene = new Scene(image.getPixelWriter(), width, height);
-            scene.add(geometryBuilder.toGeometry());
             // TODO: adjust camera, light source, etc. according to scene
             BoundingBox sb = scene.getBoundingBox();
             Vector3D position = sb.max();
@@ -113,6 +102,17 @@ public class RenderController {
                     new Vector3D(500, 0, 0), 0.6, 1, 1);
             camera.translateLocal(new Vector3D(100, -100, -200));
             scene.setCamera(camera);
+
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Load Model Results");
+            alert.setHeaderText(null);
+            String stringBuilder = "Successfully loaded 3ds model file." +
+                    System.lineSeparator() +
+                    "Number of triangles: " +
+                    numberOfTriangles +
+                    System.lineSeparator();
+            alert.setContentText(stringBuilder);
+            alert.showAndWait();
 
             // fire up the computation
             scene.compute(maxDepth, subPixelDivision, passPerPixel);
