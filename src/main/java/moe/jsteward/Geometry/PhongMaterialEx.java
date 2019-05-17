@@ -13,4 +13,15 @@ class PhongMaterialEx extends PhongMaterial {
     Color getEmissiveColor() {
         return emissiveColor;
     }
+
+    PhongMaterialEx(PhongMaterial material) {
+        super();
+        this.setBumpMap(material.getBumpMap());
+        this.setDiffuseColor(material.getDiffuseColor());
+        this.setDiffuseMap(material.getDiffuseMap());
+        this.setSpecularColor(material.getSpecularColor());
+        this.setSpecularMap(material.getSpecularMap());
+        this.setSpecularPower(material.getSpecularPower());
+        this.setSelfIlluminationMap(material.getSelfIlluminationMap());
+    }
 }

@@ -10,6 +10,6 @@
         <TextField fx:id="widthField" promptText="Width"/>
         <TextField fx:id="heightField" promptText="Height"/>
     </HBox>
-    <Canvas GridPane.rowIndex="2" fx:id="canvas"/>
+    <Canvas GridPane.rowIndex="2" fx:id="canvas" width="300" height="300"/>
     <Button GridPane.rowIndex="3" text="Choose Model File" onAction="#chooseModelFile"/>
 </GridPane>

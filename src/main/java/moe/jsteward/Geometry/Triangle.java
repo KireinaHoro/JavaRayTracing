@@ -63,10 +63,13 @@ class Triangle {
         m_uAxis = m_vertex[1].subtract(m_vertex[0]);
         m_vAxis = m_vertex[2].subtract(m_vertex[0]);
         m_normal = m_uAxis.crossProduct(m_vAxis);
-        m_normal = m_normal.normalize();
-        m_vertexNormal[0] = m_normal;
-        m_vertexNormal[1] = m_normal;
-        m_vertexNormal[2] = m_normal;
+        // TODO fix detection
+        if (m_normal.getNorm() != 0) {
+            m_normal = m_normal.normalize();
+            m_vertexNormal[0] = m_normal;
+            m_vertexNormal[1] = m_normal;
+            m_vertexNormal[2] = m_normal;
+        }
     }
 
     /*
