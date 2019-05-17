@@ -3,6 +3,7 @@ package moe.jsteward;
 import com.interactivemesh.jfx.importer.tds.TdsModelImporter;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -68,7 +69,7 @@ public class RenderController {
         File selectedFile = fileChooser.showOpenDialog(greetingLabel.getScene().getWindow());
 
         // start render worker
-        new Thread(() -> {
+        Platform.runLater(() -> {
             TdsModelImporter importer = new TdsModelImporter();
             importer.read(selectedFile);
 
@@ -160,7 +161,7 @@ public class RenderController {
             aa.setContentText("The rendering has completed successfully.  The program will now exit.");
             aa.showAndWait();
             System.exit(0);
-        }).start();
+        });
 
         // update timeline
         Timeline timeline = new Timeline();
