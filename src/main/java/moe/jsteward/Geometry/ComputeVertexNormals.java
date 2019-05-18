@@ -54,92 +54,26 @@ class ComputeVertexNormals {
     }
 
     /*
-     * auto need todo
-     */
-    private void computeNormalsForGroups() {
-        for (Vector<Integer> it : m_groups) {
-            computeNormalsForGroup(it);
-        }
-    }
-
-    /*
-     * Computes the per vertex normals for a given groups of triangles
-     * auto need todo
-     */
-    private void computeNormalsForGroup(Vector<Integer> group) {
-        // We create a Map accumulating the sum of the normals
-        Map<Vector3D, Vector3D> m_normals = new HashMap<>();
-        for (Integer it : group) {
-            Triangle triangle = m_triangles.elementAt(it);
-            for (int i = 0; i < 3; ++i) {
-                m_normals.replace(triangle.vertex(i),
-                        m_normals.get(triangle.vertex(i)).add(triangle.normal()));
-            }
-        }
-        // We set the normals of the triangles belonging to the group
-        for (Integer it : group) {
-            Triangle triangle = m_triangles.elementAt(it);//**it;
-            for (int i = 0; i < 3; ++i) {
-                Vector3D found = m_normals.get(triangle.vertex(i));
-                if (found != null) {
-                    //Map<Integer,Integer> a=new Map<Integer,Integer>;
-                    triangle.setVertexNormal(i, found.normalize());
-                }
-            }
-        }
-    }
-
-    /*
-     * Computes the groups of triangles based on the edge to triangle Map
-     * Pointer need todo
-     */
-    private void computeGroups() {
-        // 1- We compute the triangle adjency graph.
-        Vector<Vector<Integer>> graph = new Vector<>(m_triangles.size());
-        for (Vector<Integer> it : m_edgeToTriangle.values()) {
-            graph.elementAt(it.elementAt(1)).add(it.elementAt(1));
-            graph.elementAt(it.elementAt(0)).add(it.elementAt(0));
-        }
-
-        // 2 - We compute the connected components.
-        Vector<Boolean> explored = new Vector<>(m_triangles.size());/* maybe need init to false */
-        Vector<Integer> toExplore = new Vector<>();
-        for (int cpt = 0; cpt < graph.size(); ++cpt) {
-            if (explored.elementAt(cpt)) {
-                continue;
-            }
-            m_groups.add(new Vector<>());
-            toExplore.add(cpt);
-            while (!toExplore.isEmpty()) {
-                int current = toExplore.lastElement();
-                toExplore.remove(toExplore.lastElement());/*pop_back() */
-                if (explored.elementAt(current)) {
-                    continue;
-                }
-                explored.setElementAt(true, current);
-                m_groups.lastElement().add(current);
-                toExplore.addAll(graph.elementAt(current));
-            }
-        }
-    }
-
-    /*
      * Computes the edge to triangle map
      */
     private void computeEdgeToTriangle() {
+        m_edgeToTriangle = new HashMap<>();
         for (int cpt = 0; cpt < m_triangles.size(); ++cpt) {
             Triangle triangle = m_triangles.elementAt(cpt);
             for (int i = 0; i < 3; ++i) {
-                m_edgeToTriangle.get(makeEdge(triangle.vertex(i), triangle.vertex((i + 1) % 3))).add(cpt);
+                MutablePair<Vector3D, Vector3D> edge = makeEdge(triangle.vertex(i), triangle.vertex((i + 1) % 3));
+                if (!m_edgeToTriangle.containsKey(edge))
+                    m_edgeToTriangle.put(edge, new Vector<>());
+                // TODO Cloud : I doubt if this works...
+                m_edgeToTriangle.get(edge).add(cpt);
             }
         }
     }
 
     /*
-     * Filters the edge to triangle Map by removing edges shared by triangles for which the dot product
-     * of normals is lower than the given threshold
+     * Filters the edge to triangle Map by removing edges shared by triangles
+     * for which the dot product of normals is lower than the given threshold
      */
-
     private void filterEdges(double cosLimit) {
         Vector<Map.Entry<MutablePair<Vector3D, Vector3D>, Vector<Integer>>> toRemove = new Vector<>();
         Vector<Integer> trianglesToRemove = new Vector<>();
@@ -161,7 +95,9 @@ class ComputeVertexNormals {
         }
         for (Map.Entry<MutablePair<Vector3D, Vector3D>, Vector<Integer>> it1 : toRemove) {
             // TODO Cloud : i saw the warning... confusing...
-            m_edgeToTriangle.remove(it1);
+            // TODO changed by simply dealing with the warning
+            // TODO because it has two delete parts, hard to change...
+            m_edgeToTriangle.remove(it1.getKey(), it1.getValue());
         }
         toRemove.clear();
         Collections.sort(trianglesToRemove);
@@ -177,9 +113,100 @@ class ComputeVertexNormals {
             }
         }
         for (Map.Entry<MutablePair<Vector3D, Vector3D>, Vector<Integer>> it1 : toRemove) {
-            m_edgeToTriangle.remove(it1);
+            m_edgeToTriangle.remove(it1.getKey(), it1.getValue());
         }
     }
+
+    /*
+     * Computes the groups of triangles based on the edge to triangle Map
+     * Pointer need todo
+     */
+    private void computeGroups() {
+        m_groups = new Vector<>();
+        // 1- We compute the triangle adjency graph.
+        Vector<Vector<Integer>> graph = new Vector<>();
+        System.err.println("m_trianglesSize: " + m_triangles.size());
+        System.err.println("graphSize: " + graph.size());
+        for (int i = 0; i < m_triangles.size(); ++i)
+            graph.add(new Vector<>());
+        System.err.println("graphSizeAfter: " + graph.size());
+        for (Vector<Integer> it : m_edgeToTriangle.values()) {
+            // TODO CLoud: i saw this, does it change graph elements?
+            graph.elementAt(it.elementAt(1)).add(it.elementAt(1));
+            graph.elementAt(it.elementAt(0)).add(it.elementAt(0));
+        }
+
+        // 2 - We compute the connected components.
+        Vector<Boolean> explored = new Vector<>();/* maybe need init to false */
+        for (int i = 0; i < m_triangles.size(); ++i) {
+            explored.add(false);
+        }
+        Vector<Integer> toExplore = new Vector<>();
+        for (int cpt = 0; cpt < graph.size(); ++cpt) {
+            if (explored.elementAt(cpt)) {
+                continue;
+            }
+            m_groups.add(new Vector<>());
+            toExplore.add(cpt);
+            while (!toExplore.isEmpty()) {
+                int current = toExplore.lastElement();
+                toExplore.remove(toExplore.lastElement());/*pop_back() */
+                if (explored.elementAt(current)) {
+                    continue;
+                }
+                explored.setElementAt(true, current);
+                m_groups.lastElement().add(current);
+                toExplore.addAll(graph.elementAt(current));
+            }
+        }
+    }
+
+    /*
+     * auto need todo
+     */
+    private void computeNormalsForGroups() {
+        for (Vector<Integer> it : m_groups) {
+            computeNormalsForGroup(it);
+        }
+    }
+
+    /*
+     * Computes the per vertex normals for a given groups of triangles
+     * auto need todo
+     */
+    private void computeNormalsForGroup(Vector<Integer> group) {
+        // We create a Map accumulating the sum of the normals
+        Map<Vector3D, Vector3D> m_normals = new HashMap<>();
+        for (Integer it : group) {
+            Triangle triangle = m_triangles.elementAt(it);
+            for (int i = 0; i < 3; ++i) {
+                if (m_normals.containsKey(triangle.vertex(i))) {
+                    m_normals.replace(triangle.vertex(i),
+                            m_normals.get(triangle.vertex(i)).add(triangle.normal()));
+
+                } else {
+                    m_normals.put(triangle.vertex((i)), triangle.normal());
+                }
+            }
+        }
+        // We set the normals of the triangles belonging to the group
+        for (Integer it : group) {
+            Triangle triangle = m_triangles.elementAt(it);//**it;
+            for (int i = 0; i < 3; ++i) {
+                Vector3D found = m_normals.get(triangle.vertex(i));
+                if (found != null && found.getNorm() != 0) {
+                    // TODO add !=0, don't know if wrong...
+                    //Map<Integer,Integer> a=new Map<Integer,Integer>;
+                    triangle.setVertexNormal(i, found.normalize());
+                } else {
+                    // TODO as well...
+                    triangle.setVertexNormal(i, Vector3D.NaN);
+                }
+            }
+            m_triangles.setElementAt(triangle, it);
+        }
+    }
+
 
     /*
      * Ensures that the cosine of the angle between normals of each triangle is greater than the given threshold

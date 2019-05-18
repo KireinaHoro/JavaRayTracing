@@ -23,5 +23,6 @@ class PhongMaterialEx extends PhongMaterial {
         this.setSpecularMap(material.getSpecularMap());
         this.setSpecularPower(material.getSpecularPower());
         this.setSelfIlluminationMap(material.getSelfIlluminationMap());
+        this.emissiveColor = new Color(0, 0, 0, 1);
     }
 }
