@@ -124,7 +124,12 @@ class ComputeVertexNormals {
     private void computeGroups() {
         m_groups = new Vector<>();
         // 1- We compute the triangle adjency graph.
-        Vector<Vector<Integer>> graph = new Vector<>(m_triangles.size());
+        Vector<Vector<Integer>> graph = new Vector<>();
+        System.err.println("m_trianglesSize: " + m_triangles.size());
+        System.err.println("graphSize: " + graph.size());
+        for (int i = 0; i < m_triangles.size(); ++i)
+            graph.add(new Vector<>());
+        System.err.println("graphSizeAfter: " + graph.size());
         for (Vector<Integer> it : m_edgeToTriangle.values()) {
             // TODO CLoud: i saw this, does it change graph elements?
             graph.elementAt(it.elementAt(1)).add(it.elementAt(1));
@@ -132,9 +137,9 @@ class ComputeVertexNormals {
         }
 
         // 2 - We compute the connected components.
-        Vector<Boolean> explored = new Vector<>(m_triangles.size());/* maybe need init to false */
+        Vector<Boolean> explored = new Vector<>();/* maybe need init to false */
         for (int i = 0; i < m_triangles.size(); ++i) {
-            explored.setElementAt(false, i);
+            explored.add(false);
         }
         Vector<Integer> toExplore = new Vector<>();
         for (int cpt = 0; cpt < graph.size(); ++cpt) {
@@ -175,8 +180,13 @@ class ComputeVertexNormals {
         for (Integer it : group) {
             Triangle triangle = m_triangles.elementAt(it);
             for (int i = 0; i < 3; ++i) {
-                m_normals.replace(triangle.vertex(i),
-                        m_normals.get(triangle.vertex(i)).add(triangle.normal()));
+                if (m_normals.containsKey(triangle.vertex(i))) {
+                    m_normals.replace(triangle.vertex(i),
+                            m_normals.get(triangle.vertex(i)).add(triangle.normal()));
+
+                } else {
+                    m_normals.put(triangle.vertex((i)), triangle.normal());
+                }
             }
         }
         // We set the normals of the triangles belonging to the group
@@ -184,15 +194,18 @@ class ComputeVertexNormals {
             Triangle triangle = m_triangles.elementAt(it);//**it;
             for (int i = 0; i < 3; ++i) {
                 Vector3D found = m_normals.get(triangle.vertex(i));
-                if (found != null) {
+                if (found != null && found.getNorm() != 0) {
+                    // TODO add !=0, don't know if wrong...
                     //Map<Integer,Integer> a=new Map<Integer,Integer>;
                     triangle.setVertexNormal(i, found.normalize());
+                } else {
+                    // TODO as well...
+                    triangle.setVertexNormal(i, Vector3D.NaN);
                 }
             }
             m_triangles.setElementAt(triangle, it);
         }
     }
-
 
 
     /*

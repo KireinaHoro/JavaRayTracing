@@ -19,7 +19,7 @@ public class Scene {
 
     private final List<MutablePair<BoundingBox, Geometry>> m_geometries
             = new LinkedList<>();
-    private List<PointLight> m_lights;
+    private List<PointLight> m_lights = new LinkedList<>();
     private Camera m_camera;
     private BoundingBox m_sceneBoundingBox;
     private int m_diffuseSamples;
@@ -107,7 +107,9 @@ public class Scene {
     /**
      * adds a point light to this Scene.
      */
-    public void add(final PointLight light) {
+    public void add(PointLight light) {
+        if (light == null)
+            System.err.println("WTF is it REALLY NULL????");
         m_lights.add(light);
     }
 
@@ -255,6 +257,7 @@ public class Scene {
      * computes a rendering of this Scene.
      */
     public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
+        m_lightSampler = new LightSampler();
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<>();
         for (MutablePair<BoundingBox, Geometry> pair : m_geometries) {

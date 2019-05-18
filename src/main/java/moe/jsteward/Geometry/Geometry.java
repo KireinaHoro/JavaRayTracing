@@ -6,6 +6,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -28,6 +29,7 @@ public class Geometry {
     protected void updateTriangles() {
         for (Triangle triangle : m_triangles) {
             triangle.update();
+            // TODO Cloud: does this works?????
         }
     }
 
@@ -82,6 +84,9 @@ public class Geometry {
         ObservableFaceArray faces = triangleMesh.getFaces();
         ObservableIntegerArray smoothingGroups = triangleMesh.getFaceSmoothingGroups();
         List<Vector3D> normalsList = new ArrayList<>();
+
+        boolean PT = triangleMesh.getVertexFormat() == VertexFormat.POINT_TEXCOORD;
+
         // add vertices
         for (int i = 0; i < points.size(); i += triangleMesh.getPointElementSize()) {
             addVertex(new Vector3D(
@@ -89,6 +94,7 @@ public class Geometry {
                     points.get(i + 1),
                     points.get(i + 2)));
         }
+        System.err.println("vertexSize:" + m_vertices.size());
         // add texture coordinates
         for (int i = 0; i < textureCoordinates.size(); i += triangleMesh.getTexCoordElementSize()) {
             addTextureCoordinates(new Vector2D(
@@ -96,6 +102,7 @@ public class Geometry {
                     textureCoordinates.get(i + 1)));
         }
         // add normals
+        System.err.println("NormalsSize:" + normals.size());
         for (int i = 0; i < normals.size(); i += triangleMesh.getNormalElementSize()) {
             normalsList.add(new Vector3D(
                     points.get(i),
@@ -103,17 +110,37 @@ public class Geometry {
                     points.get(i + 2)));
         }
         // register triangles
-        for (int i = 0; i < faces.size(); i += triangleMesh.getFaceElementSize()) {
-            int coordX = faces.get(i);
-            int coordY = faces.get(i + 1);
-            int coordZ = faces.get(i + 2);
-            Vector3D[] normalsArray = new Vector3D[3];
-            normalsArray[0] = normalsList.get(i);
-            normalsArray[1] = normalsList.get(i + 1);
-            normalsArray[2] = normalsList.get(i + 2);
-            addTriangle(coordX, coordY, coordZ,
-                    new PhongMaterialEx(material),
-                    normalsArray);
+        System.err.println("FacesSize:" + faces.size());
+        if (PT) {
+            for (int i = 0; i < faces.size(); i += triangleMesh.getFaceElementSize()) {
+                int p0 = faces.get(i);
+                int p1 = faces.get(i + 2);
+                int p2 = faces.get(i + 4);
+                int t0 = faces.get(i + 1);
+                int t1 = faces.get(i + 3);
+                int t2 = faces.get(i + 5);
+                addTriangle(p0, p1, p2, t0, t1, t2,
+                        new PhongMaterialEx(material));
+            }
+        } else {
+            for (int i = 0; i < faces.size(); i += triangleMesh.getFaceElementSize()) {
+                int p0 = faces.get(i);
+                int p1 = faces.get(i + 3);
+                int p2 = faces.get(i + 6);
+                int t0 = faces.get(i + 1);
+                int t1 = faces.get(i + 4);
+                int t2 = faces.get(i + 7);
+                int n0 = faces.get(i + 2);
+                int n1 = faces.get(i + 5);
+                int n2 = faces.get(i + 8);
+                Vector3D[] normalsArray = new Vector3D[3];
+                normalsArray[0] = normalsList.get(n0);
+                normalsArray[1] = normalsList.get(n1);
+                normalsArray[2] = normalsList.get(n2);
+                addTriangle(p0, p1, p2, t0, t1, t2,
+                        new PhongMaterialEx(material),
+                        normalsArray);
+            }
         }
     }
 
@@ -121,7 +148,14 @@ public class Geometry {
      * adds a triangle, normals = null.
      */
     void addTriangle(int i1, int i2, int i3, PhongMaterialEx material) {
-        addTriangle(i1, i2, i3, material, null);
+        if (m_textureCoordinates.isEmpty()) {
+            m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                    material));
+        } else {
+            m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                    m_textureCoordinates.get(i1), m_textureCoordinates.get(i2), m_textureCoordinates.get(i3),
+                    material));
+        }
     }
 
     /**
@@ -145,10 +179,31 @@ public class Geometry {
     }
 
     /**
+     * adds a triangle.
+     *
+     * @param i1       index of first vertex.
+     * @param i2       index of second vertex.
+     * @param i3       index of third vertex.
+     * @param t1       index of first texture.
+     * @param t2       index of second texture.
+     * @param t3       index of third texture.
+     * @param material the material.
+     * @param normals  the normals.
+     */
+    private void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3,
+                             PhongMaterialEx material, Vector3D[] normals) {
+        m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
+                material, normals));
+    }
+
+    /**
      * adds a triangle, normals = null
      */
     public void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3, PhongMaterialEx material) {
-        addTriangle(i1, i2, i3, t1, t2, t3, material, null);
+        m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
+                m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
+                material));
     }
 
     /**
@@ -183,7 +238,10 @@ public class Geometry {
      * adds a triangle, with normals = null
      */
     void addTriangle(Vector3D p0, Vector3D p1, Vector3D p2, PhongMaterialEx material) {
-        addTriangle(p0, p1, p2, material, null);
+        int i1 = addVertex(p0);
+        int i2 = addVertex(p1);
+        int i3 = addVertex(p2);
+        addTriangle(i1, i2, i3, material);
     }
 
     /**
@@ -314,24 +372,5 @@ public class Geometry {
         Vector<Triangle> triangles = new Vector<>(m_triangles);
         ComputeVertexNormals normalsComputation = new ComputeVertexNormals(triangles);
         normalsComputation.compute(cosAngleLimit);
-    }
-
-    /**
-     * adds a triangle.
-     *
-     * @param i1       index of first vertex.
-     * @param i2       index of second vertex.
-     * @param i3       index of third vertex.
-     * @param t1       index of first texture.
-     * @param t2       index of second texture.
-     * @param t3       index of third texture.
-     * @param material the material.
-     * @param normals  the normals.
-     */
-    private void addTriangle(int i1, int i2, int i3, int t1, int t2, int t3,
-                             PhongMaterialEx material, Vector3D[] normals) {
-        m_triangles.add(new Triangle(m_vertices.get(i1), m_vertices.get(i2), m_vertices.get(i3),
-                m_textureCoordinates.get(t1), m_textureCoordinates.get(t2), m_textureCoordinates.get(t3),
-                material, normals));
     }
 }

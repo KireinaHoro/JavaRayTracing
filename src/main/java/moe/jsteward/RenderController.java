@@ -4,6 +4,7 @@ import com.interactivemesh.jfx.importer.tds.TdsModelImporter;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -30,6 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.imageio.ImageIO;
 
 public class RenderController {
     public Label greetingLabel;
@@ -126,13 +129,29 @@ public class RenderController {
                 );
                 File file = saveFileChooser.showSaveDialog(greetingLabel.getScene().getWindow());
                 if (file != null) {
+                    for (int x = 0; x < image.getWidth(); ++x) {
+                        for (int y = 0; y < image.getHeight(); ++y) {
+                            System.err.println("(x:" + x + ",y:" + y + "):" +
+                                    image.getPixelReader().getColor(x, y)
+                                            .toString());
+                        }
+                    }
+                    try {
+                        ImageIO.write(SwingFXUtils.fromFXImage(image, null),
+                                "png", file);
+                        break;
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                    /*
                     // write image png
                     PixelReader reader = image.getPixelReader();
                     int size = width * height * 4;
                     byte[] buffer = new byte[size];
-                    WritablePixelFormat<ByteBuffer> format =
-                            (WritablePixelFormat<ByteBuffer>) PixelFormat.getByteRgbInstance();
-                    reader.getPixels(0, 0, width, height, format, buffer, 0, width * 4);
+                    //WritablePixelFormat<ByteBuffer> format =
+                    //        (WritablePixelFormat<ByteBuffer>) PixelFormat.getByteRgbInstance();
+                    //reader.getPixels(0, 0, width, height, format, buffer, 0, width * 4);
+                    reader.getPixels(0, 0, width, height, PixelFormat.getByteBgraInstance(), buffer, 0, width * 4);
                     try {
                         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
                         for (int count = 0; count < buffer.length; count += 4) {
@@ -151,8 +170,8 @@ public class RenderController {
                         a.setContentText(ExceptionUtils.getStackTrace(e));
                         a.showAndWait();
                     }
+                    */
                 }
-
             }
 
             Alert aa = new Alert(AlertType.INFORMATION);
