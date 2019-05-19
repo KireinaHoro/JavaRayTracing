@@ -13,10 +13,19 @@ public class ColorEx {
     }
 
     public ColorEx(Color c) {
-        R = c.getRed();
-        G = c.getGreen();
-        B = c.getBlue();
-        a = c.getOpacity();
+        try {
+            // TODO what is this???
+            R = c.getRed();
+            G = c.getGreen();
+            B = c.getBlue();
+            a = c.getOpacity();
+        } catch (NullPointerException e) {
+            R = 0.0;
+            G = 0.0;
+            B = 0.0;
+            a = 0.0;
+            //System.err.println(e);
+        }
     }
 
     double getRed() {
@@ -33,6 +42,10 @@ public class ColorEx {
 
     double getOpacity() {
         return a;
+    }
+
+    double grey() {
+        return (R + G + B) / 3.0;
     }
 
     Color toColor() {

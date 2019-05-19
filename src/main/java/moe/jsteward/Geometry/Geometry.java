@@ -18,8 +18,8 @@ public class Geometry {
     /**
      * A 3D geometry.
      */
-    private final List<Vector2D> m_textureCoordinates = new LinkedList<>();
-    private final List<Triangle> m_triangles = new LinkedList<>();
+    private List<Vector2D> m_textureCoordinates = new LinkedList<>();
+    private List<Triangle> m_triangles = new LinkedList<>();
     private List<Vector3D> m_vertices = new LinkedList<>();
 
     /**
@@ -51,6 +51,9 @@ public class Geometry {
      * default constructor.
      */
     public Geometry() {
+        m_vertices = new LinkedList<>();
+        m_triangles = new LinkedList<>();
+        m_textureCoordinates = new LinkedList<>();
     }
 
     /**
@@ -251,19 +254,27 @@ public class Geometry {
      */
     void merge(Geometry geometry) {
         Map<Vector3D, Integer> vertex2ind = new HashMap<>();
+        System.err.println("vertex2ind :: ");
         for (Vector3D vec : geometry.getVertices()) {
+            System.err.print(vec);
             if (!vertex2ind.containsKey(vec)) {
                 vertex2ind.put(vec, addVertex(vec));
+                System.err.print(":" + vertex2ind.get(vec));
             }
+            System.err.println();
         }
+        System.err.println(vertex2ind.size() + " " + geometry.getVertices().size());
         Map<Vector2D, Integer> texture2ind = new HashMap<>();
         for (Vector2D texCoord : geometry.m_textureCoordinates) {
             if (!texture2ind.containsKey(texCoord)) {
                 texture2ind.put(texCoord, addTextureCoordinates(texCoord));
             }
         }
-        for (Triangle triangle : geometry.m_triangles) {
-            int i1 = vertex2ind.get(triangle.vertex(0));
+        for (Triangle triangle : geometry.getTriangles()) {
+            System.err.println(triangle.vertex(0));
+            System.err.println(vertex2ind.containsKey(triangle.vertex(0)));
+            int i1 = vertex2ind.get(
+                    triangle.vertex(0));
             int i2 = vertex2ind.get(triangle.vertex(1));
             int i3 = vertex2ind.get(triangle.vertex(2));
             if (texture2ind.containsKey(triangle.textureCoordinate(0))) {
@@ -298,9 +309,21 @@ public class Geometry {
      *
      * @param t the translation matrix.
      */
-    void translate(Vector3D t) {
+    public void translate(Vector3D t) {
         m_vertices = m_vertices.stream()
                 .map(v -> v.add(t))
+                .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(v -> new Triangle(
+                        v.vertex(0).add(t),
+                        v.vertex(1).add(t),
+                        v.vertex(2).add(t),
+                        v.textureCoordinate(0),
+                        v.textureCoordinate(1),
+                        v.textureCoordinate(2),
+                        v.material(),
+                        v.getVertexNormals()
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -313,6 +336,18 @@ public class Geometry {
         m_vertices = m_vertices.stream()
                 .map(vec -> vec.scalarMultiply(v))
                 .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(tri -> new Triangle(
+                        tri.vertex(0).scalarMultiply(v),
+                        tri.vertex(1).scalarMultiply(v),
+                        tri.vertex(2).scalarMultiply(v),
+                        tri.textureCoordinate(0),
+                        tri.textureCoordinate(1),
+                        tri.textureCoordinate(2),
+                        tri.material(),
+                        tri.getVertexNormals()
+                ))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -323,6 +358,18 @@ public class Geometry {
     public void scaleX(double v) {
         m_vertices = m_vertices.stream()
                 .map(vec -> new Vector3D(v * vec.getX(), vec.getY(), vec.getZ()))
+                .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(tri -> new Triangle(
+                        tri.vertex(0).scalarMultiply(v),
+                        tri.vertex(1),
+                        tri.vertex(2),
+                        tri.textureCoordinate(0),
+                        tri.textureCoordinate(1),
+                        tri.textureCoordinate(2),
+                        tri.material(),
+                        tri.getVertexNormals()
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -335,6 +382,18 @@ public class Geometry {
         m_vertices = m_vertices.stream()
                 .map(vec -> new Vector3D(vec.getX(), v * vec.getY(), vec.getZ()))
                 .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(tri -> new Triangle(
+                        tri.vertex(0),
+                        tri.vertex(1).scalarMultiply(v),
+                        tri.vertex(2),
+                        tri.textureCoordinate(0),
+                        tri.textureCoordinate(1),
+                        tri.textureCoordinate(2),
+                        tri.material(),
+                        tri.getVertexNormals()
+                ))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -345,6 +404,18 @@ public class Geometry {
     public void scaleZ(double v) {
         m_vertices = m_vertices.stream()
                 .map(vec -> new Vector3D(vec.getX(), vec.getY(), v * vec.getZ()))
+                .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(tri -> new Triangle(
+                        tri.vertex(0),
+                        tri.vertex(1),
+                        tri.vertex(2).scalarMultiply(v),
+                        tri.textureCoordinate(0),
+                        tri.textureCoordinate(1),
+                        tri.textureCoordinate(2),
+                        tri.material(),
+                        tri.getVertexNormals()
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -359,6 +430,24 @@ public class Geometry {
                         (q.multiply(new Quaternion(vec.toArray())).
                                 multiply(q.getConjugate()).getVectorPart())
                 )
+                .collect(Collectors.toList());
+        m_triangles = m_triangles.stream()
+                .map(tri -> new Triangle(
+                        new Vector3D
+                                (q.multiply(new Quaternion(tri.vertex(0).toArray())).
+                                        multiply(q.getConjugate()).getVectorPart()),
+                        new Vector3D
+                                (q.multiply(new Quaternion(tri.vertex(1).toArray())).
+                                        multiply(q.getConjugate()).getVectorPart()),
+                        new Vector3D
+                                (q.multiply(new Quaternion(tri.vertex(2).toArray())).
+                                        multiply(q.getConjugate()).getVectorPart()),
+                        tri.textureCoordinate(0),
+                        tri.textureCoordinate(1),
+                        tri.textureCoordinate(2),
+                        tri.material(),
+                        tri.getVertexNormals()
+                ))
                 .collect(Collectors.toList());
     }
 

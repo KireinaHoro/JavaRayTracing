@@ -6,10 +6,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 
@@ -31,8 +28,8 @@ public class Scene {
     private LightSampler m_lightSampler;
     private KDNode kdTree;
 
-    private Map<MutablePair<Integer, Integer>, MutablePair<Integer, ColorEx>>
-            accumulateBuffer = new HashMap<>();
+    private Vector<MutablePair<Integer, ColorEx>>
+            accumulateBuffer = new Vector<>();
 
     /**
      * Constructor.
@@ -286,7 +283,7 @@ public class Scene {
      * computes a rendering of this Scene.
      */
     public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
-        //List<Double> greys = new
+        Vector<Double> greys = new Vector<>();
 
         m_lightSampler = new LightSampler();
         // build the kdTree
@@ -302,7 +299,7 @@ public class Scene {
 
         for (int x = 0; x < imgXRange; ++x)
             for (int y = 0; y < imgYRange; ++y) {
-                accumulateBuffer.put(new MutablePair<>(x, y),
+                accumulateBuffer.add(
                         new MutablePair<>(0,
                                 new ColorEx(0, 0, 0, 1)));
             }
@@ -331,8 +328,8 @@ public class Scene {
                                 ColorEx result = sendRay(m_camera.getRay(((double) x + xp) / imgXRange,
                                         ((double) y + yp) / imgYRange), 0,
                                         maxDepth, m_diffuseSamples, m_specularSamples);
-                                MutablePair<Integer, Integer> coord = new MutablePair<>(x, y);
-                                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(coord);
+                                greys.add(result.grey());
+                                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(x * imgYRange + y);
                                 curr.left = curr.left + 1;
                                 curr.right = StrangeMethods.add(curr.right, result);
                                 pw.setColor(x, y,
@@ -341,7 +338,7 @@ public class Scene {
                                                 10)
                                                 .toColor()
                                 );
-                                accumulateBuffer.replace(coord, curr);
+                                accumulateBuffer.setElementAt(curr, x * imgYRange + y);
                             }));
                     t2 = System.currentTimeMillis();
                     elapsedTime = (double) (t2 - t1);
@@ -350,11 +347,42 @@ public class Scene {
                 }
             }
         }
+        /*
+        Collections.sort(greys);
+        int midCount = 0;
+        double midGreyValue = 0;
+        // 90% points for sampling
+        double tar = 0.05*greys.get((new Double(greys.size()*0.9)).intValue());
+        for (int i = 0; i < greys.size() * 0.9; ++i) {
+            // 5% brightness -> black
+            if (greys.get(i) > tar) {
+                midCount++;
+                midGreyValue += greys.get(i);
+                }
+            }
+        midGreyValue /= midCount;
+        for (int y = 0; y < imgYRange; y++)
+            for (int x = 0; x < imgXRange; x++) {
+                int coord = x*imgYRange+y;
+                MutablePair<Integer, ColorEx> at = accumulateBuffer.get(coord);
+                pw.setColor(x, y,
+                        StrangeMethods.divide(
+                            StrangeMethods.divide(
+                                    at.right,
+                                    at.left),
+                                midGreyValue)
+                .toColor());
+                }
+
+         */
+        /*
         for (int x = 0; x < imgXRange; ++x)
             for (int y = 0; y < imgYRange; ++y) {
-                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(new MutablePair<>(x, y));
+                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(x * imgYRange + y);
                 System.err.println("(x:" + x + ",y:" + y + ") - " + curr.left + "," + curr.right);
             }
+
+         */
         // stop timer
         t2 = System.currentTimeMillis();
         elapsedTime = (double) (t2 - t1);
