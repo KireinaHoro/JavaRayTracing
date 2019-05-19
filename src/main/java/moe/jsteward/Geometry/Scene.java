@@ -286,6 +286,8 @@ public class Scene {
      * computes a rendering of this Scene.
      */
     public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
+        //List<Double> greys = new
+
         m_lightSampler = new LightSampler();
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<>();
