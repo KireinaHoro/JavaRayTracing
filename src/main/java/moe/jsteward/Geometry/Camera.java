@@ -41,7 +41,7 @@ public class Camera {
      *  rotate a Quaternion by another Quaternion
      */
     private Vector3D rotate(Quaternion m1, Quaternion m2) {
-        return new Vector3D(m1.multiply(m2).multiply(m1.getInverse()).getVectorPart());
+        return new Vector3D(m1.multiply(m2).multiply(m1.getConjugate()).getVectorPart());
     }
 
     /*
@@ -50,7 +50,11 @@ public class Camera {
     private void computeParameters() {
         m_front = m_target.subtract(m_position);
         m_front = m_front.normalize();
-        m_right = rotate(new Quaternion(-3.14159265 / 2.0, 0.0, 0.0, 1.0), new Quaternion(m_front.toArray()));
+        m_right = rotate(
+                new Quaternion(
+                        Math.cos(-3.14159265 / 4.0),
+                        (new Vector3D(0.0, 0.0, 1.0)).scalarMultiply(Math.sin(-3.14159265f / 4.0f)).toArray()).normalize(),
+                new Quaternion(m_front.toArray()));
         m_right = new Vector3D(m_right.getX(), m_right.getY(), 0.0);
         m_right = m_right.normalize();
         m_down = m_front.crossProduct(m_right);
