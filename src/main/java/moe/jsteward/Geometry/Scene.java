@@ -3,10 +3,13 @@ package moe.jsteward.Geometry;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 
@@ -27,6 +30,9 @@ public class Scene {
     private int m_lightSamples;
     private LightSampler m_lightSampler;
     private KDNode kdTree;
+
+    private Map<MutablePair<Integer, Integer>, MutablePair<Integer, ColorEx>>
+            accumulateBuffer = new HashMap<>();
 
     /**
      * Constructor.
@@ -167,11 +173,11 @@ public class Scene {
 
 
     /**
-     * sends a ray in this Scene, returns the computed Color.
+     * sends a ray in this Scene, returns the computed ColorEx.
      */
-    private Color sendRay(final Ray ray, int depth, final int maxDepth,
-                          final int diffuseSamples, final int specularSamples) {
-        Color result = new Color(0, 0, 0, 1);
+    private ColorEx sendRay(final Ray ray, int depth, final int maxDepth,
+                            final int diffuseSamples, final int specularSamples) {
+        ColorEx result = new ColorEx(0, 0, 0, 1);
         // calculate intersection of current ray.
         RayTriangleIntersection intersection = getIntersection(ray, null);
         if (!intersection.valid()) {
@@ -179,33 +185,48 @@ public class Scene {
             return result;
         }
 
+        //return new ColorEx(1, 1, 1, 1);
+
+
+        //System.err.println("Hey Intersects!!!"+depth);
         Vector3D intersectionPoint = intersection.intersection();
         Triangle triangle = intersection.triangle();
         PhongMaterialEx material = triangle.material();
-        Color diffuse = material.getDiffuseColor();
-        Color specular = material.getSpecularColor();
+        ColorEx diffuse = new ColorEx(material.getDiffuseColor());
+        ColorEx specular = new ColorEx(material.getSpecularColor());
+        //System.err.println("di"+diffuse.toString()+", sp"+specular.toString());
+
         double shininess = material.getSpecularPower();
         Vector3D normal = triangle.sampleNormal(intersection.uTriangleValue(),
                 intersection.vTriangleValue(), ray.source());
         Vector3D reflection = Triangle.reflectionDirection(normal, ray.direction()).normalize();
         // for each light source
         for (PointLight light : m_lights) {
+            //System.err.println("lighting:: " + light.color().toString());
             Vector3D lightRay = light.position().subtract(intersectionPoint);
-            double distance = lightRay.getNormSq();
+            double distance = lightRay.getNorm();
             lightRay = lightRay.normalize();
+
             // calculate shadow
             RayTriangleIntersection blockIntersection = getIntersection(new Ray(intersectionPoint, lightRay), null);
             if (blockIntersection.valid()) {
                 double blockDistance =
-                        (blockIntersection.intersection().subtract(intersectionPoint)).getNormSq();
+                        (blockIntersection.intersection().subtract(intersectionPoint)).getNorm();
                 if (distance > blockDistance)
                     continue;
             }
             // ambient and emissive lighting -- phong part 1
-            // TODO those are default set to Color(0, 0, 0, 1)
+            // TODO those are default set to ColorEx(0, 0, 0, 1)
             result = StrangeMethods.add(
-                    StrangeMethods.add(result, new Color(0, 0, 0, 1)),
-                    new Color(0, 0, 0, 1));
+                    StrangeMethods.add(result,
+                            new ColorEx(0, 0, 0, 1)),
+                    new ColorEx(material.getEmissiveColor()));
+
+            //System.err.println(
+            //        "distance:: " + distance + " " +
+            //                "normal dot lightRay:: " + normal.dotProduct(lightRay) + " " +
+            //            "diffuse:: " + diffuse + " " +
+            //            "specular:: " + specular);
             // diffuse and specular lighting -- phong part 2
             // diffuse : result =
             //result + diffuse * (normal * lightRay) * light.color() / distance;
@@ -215,7 +236,8 @@ public class Scene {
                         StrangeMethods.multiply(
                                 light.color(),
                                 StrangeMethods.divide(
-                                        StrangeMethods.multiply(diffuse, normal.dotProduct(lightRay)),
+                                        StrangeMethods.multiply(
+                                                diffuse, normal.dotProduct(lightRay)),
                                         distance)));
             // specular : result =
             //result + specular * pow(reflection * lightRay, shininess) * light.color() / distance;
@@ -243,20 +265,29 @@ public class Scene {
                     )
             );
         }
+
         // texture for intersection point
         if (StrangeMethods.hasTexture(material)) {
             result = StrangeMethods.multiply(result,
-                    triangle.sampleTexture(intersection.uTriangleValue(), intersection.vTriangleValue())
+                    new ColorEx(triangle.sampleTexture(intersection.uTriangleValue(), intersection.vTriangleValue()))
             );
         }
+        //
 
+        //if(!StrangeMethods.isBlack(result)) {
+        //    System.err.println(result.toString());
+        //}
         return result;
+
+
     }
 
     /**
      * computes a rendering of this Scene.
      */
     public void compute(int maxDepth, int subPixelDivision, int passPerPixel) {
+        //List<Double> greys = new
+
         m_lightSampler = new LightSampler();
         // build the kdTree
         List<Triangle> listTriangle = new LinkedList<>();
@@ -269,6 +300,12 @@ public class Scene {
             m_lightSampler.add(pair.right);
         }
 
+        for (int x = 0; x < imgXRange; ++x)
+            for (int y = 0; y < imgYRange; ++y) {
+                accumulateBuffer.put(new MutablePair<>(x, y),
+                        new MutablePair<>(0,
+                                new ColorEx(0, 0, 0, 1)));
+            }
         // step on x and y for subpixel sampling
         double step = 1.0 / subPixelDivision;
         List<Double> stepList = new LinkedList<>();
@@ -290,10 +327,22 @@ public class Scene {
                     ++m_pass;
                     // Sends primary rays for each pixel (uncomment the pragma to parallelize rendering)
                     IntStream.range(0, imgXRange).forEach(x -> IntStream.range(0, imgYRange).parallel()
-                            .forEach(y -> pw.setColor(x, y,
-                                    sendRay(m_camera.getRay(((double) x + xp) / imgXRange,
-                                            ((double) y + yp) / imgYRange), 0,
-                                            maxDepth, m_diffuseSamples, m_specularSamples))));
+                            .forEach(y -> {
+                                ColorEx result = sendRay(m_camera.getRay(((double) x + xp) / imgXRange,
+                                        ((double) y + yp) / imgYRange), 0,
+                                        maxDepth, m_diffuseSamples, m_specularSamples);
+                                MutablePair<Integer, Integer> coord = new MutablePair<>(x, y);
+                                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(coord);
+                                curr.left = curr.left + 1;
+                                curr.right = StrangeMethods.add(curr.right, result);
+                                pw.setColor(x, y,
+                                        StrangeMethods.multiply(
+                                                StrangeMethods.divide(result, curr.left),
+                                                10)
+                                                .toColor()
+                                );
+                                accumulateBuffer.replace(coord, curr);
+                            }));
                     t2 = System.currentTimeMillis();
                     elapsedTime = (double) (t2 - t1);
                     double remainingTime = (elapsedTime / m_pass) * (passPerPixel * subPixelDivision * subPixelDivision - m_pass);
@@ -301,6 +350,11 @@ public class Scene {
                 }
             }
         }
+        for (int x = 0; x < imgXRange; ++x)
+            for (int y = 0; y < imgYRange; ++y) {
+                MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(new MutablePair<>(x, y));
+                System.err.println("(x:" + x + ",y:" + y + ") - " + curr.left + "," + curr.right);
+            }
         // stop timer
         t2 = System.currentTimeMillis();
         elapsedTime = (double) (t2 - t1);

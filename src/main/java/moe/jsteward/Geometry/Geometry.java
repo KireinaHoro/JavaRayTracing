@@ -50,7 +50,7 @@ public class Geometry {
     /**
      * default constructor.
      */
-    Geometry() {
+    public Geometry() {
     }
 
     /**
