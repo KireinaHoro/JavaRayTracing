@@ -52,8 +52,12 @@ class LightSampler {
         Color color = allTriangles.elementAt(index).sampleTexture(barycentric);
 
 
-        return new PointLight(point, StrangeMethods.multiply(
-                allTriangles.elementAt(index).material().getEmissiveColor(), color));
+        return new PointLight(point,
+                new ColorEx(
+                        StrangeMethods.multiply(
+                                allTriangles.elementAt(index).material().getEmissiveColor(),
+                                color)
+                ));
     }
 
     /*

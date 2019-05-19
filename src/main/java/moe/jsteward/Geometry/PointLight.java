@@ -1,6 +1,5 @@
 package moe.jsteward.Geometry;
 
-import javafx.scene.paint.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 /*
@@ -8,13 +7,13 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
  */
 public class PointLight {
     private final Vector3D m_position;
-    private final Color m_color;
+    private final ColorEx m_color;
 
     /*
      *   author Louis
      *   Constructor
      */
-    public PointLight(Vector3D position, Color color) {
+    public PointLight(Vector3D position, ColorEx color) {
         m_position = position;
         m_color = color;
     }
@@ -22,7 +21,7 @@ public class PointLight {
     /*
      *  get the color
      */
-    Color color() {
+    ColorEx color() {
         return m_color;
     }
 
@@ -36,8 +35,8 @@ public class PointLight {
     /*
      * intersection a valid intersection between a ray and a triangle
      */
-    Color color(RayTriangleIntersection intersection) {
+    ColorEx color(RayTriangleIntersection intersection) {
         System.out.println("PointLight::color Not implemented [TODO]");
-        return new Color(0, 0, 0, 1);
+        return new ColorEx(0, 0, 0, 1);
     }
 }

@@ -92,16 +92,20 @@ public class RenderController {
                     }
                 });
             }
+            //scene.add(
+            //        (new Cube())
+            //);
             // TODO: adjust camera, light source, etc. according to scene
             BoundingBox sb = scene.getBoundingBox();
             Vector3D position = sb.max();
             Vector3D reflected = new Vector3D(position.getX(), -position.getY(), position.getZ());
 
             scene.add(new PointLight(position.add(new Vector3D(0, 0, 70)),
-                    new Color(1.0, 1.0, 1.0, 1.0)));
+                    new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
             scene.add(new PointLight(reflected.add(new Vector3D(0, 0, 200)),
-                    new Color(1.0, 1.0, 1.0, 1.0)));
-            Camera camera = new Camera(new Vector3D(-500, -1000, 1000).scalarMultiply(1.05),
+                    new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
+            // TODO adjusting
+            Camera camera = new Camera(new Vector3D(-500, -1000, 1000).scalarMultiply(1.25),
                     new Vector3D(500, 0, 0), 0.6, 1, 1);
             camera.translateLocal(new Vector3D(100, -100, -200));
             scene.setCamera(camera);
@@ -131,9 +135,14 @@ public class RenderController {
                 if (file != null) {
                     for (int x = 0; x < image.getWidth(); ++x) {
                         for (int y = 0; y < image.getHeight(); ++y) {
-                            System.err.println("(x:" + x + ",y:" + y + "):" +
-                                    image.getPixelReader().getColor(x, y)
-                                            .toString());
+                            //System.err.println("(x:"+x+",y:"+y+"):"+
+                            //        image.getPixelReader().getColor(x, y)
+                            //                .toString());
+                            if (!image.getPixelReader().getColor(x, y)
+                                    .toString().equals("0x000000ff"))
+                                System.err.println("NONONONONONONONONONONONONONONONONO\n"
+                                        + "(x:" + x + ",y:" + y + "):" +
+                                        image.getPixelReader().getColor(x, y).toString());
                         }
                     }
                     try {
