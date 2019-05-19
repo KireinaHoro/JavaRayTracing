@@ -375,11 +375,14 @@ public class Scene {
                 }
 
          */
+        /*
         for (int x = 0; x < imgXRange; ++x)
             for (int y = 0; y < imgYRange; ++y) {
                 MutablePair<Integer, ColorEx> curr = accumulateBuffer.get(x * imgYRange + y);
                 System.err.println("(x:" + x + ",y:" + y + ") - " + curr.left + "," + curr.right);
             }
+
+         */
         // stop timer
         t2 = System.currentTimeMillis();
         elapsedTime = (double) (t2 - t1);
