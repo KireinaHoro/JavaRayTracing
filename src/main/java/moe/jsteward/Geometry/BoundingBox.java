@@ -39,7 +39,7 @@ public class BoundingBox {
     /*
      *  Constructor.
      */
-    BoundingBox() {
+    public BoundingBox() {
         m_bounds[0] = new Vector3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         m_bounds[1] = new Vector3D(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
     }
@@ -59,7 +59,7 @@ public class BoundingBox {
      *  Sets the bouding box with the given geometry.
      *  \param1	geometry	The geometry.
      */
-    private void set(final Geometry geometry) {
+    public void set(final Geometry geometry) {
         Deque<Vector3D> vertices = new LinkedList<>(geometry.getVertices());
         m_bounds[0] = vertices.getFirst();
         m_bounds[1] = vertices.getFirst();

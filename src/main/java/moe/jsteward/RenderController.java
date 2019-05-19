@@ -112,41 +112,95 @@ public class RenderController {
             scene.add(tmp2);
             */
 
-            BoundingBox groundBox = scene.getBoundingBox();
+
+// TODO: adjust camera, light source, etc. according to scene
+            BoundingBox sb = scene.getBoundingBox();
+            Vector3D position = sb.max();
+            Vector3D reflected = new Vector3D(position.getX(), -position.getY(), position.getZ());
+            Vector3D center = new Vector3D(sb.min().add(sb.max()).scalarMultiply(0.5).toArray());
+            scene.add(new PointLight(position.add(new Vector3D(0, 0, -140)),
+                    new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
+            scene.add(new PointLight(reflected.add(new Vector3D(0, 0, -210)),
+                    new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
+// TODO adjusting
+//centerK 0-2 double && centerK != 1
+            double centerK = 0.98, zDelete = (sb.max().getZ() - sb.min().getZ()) * 10.0;
+            Vector3D centerChange = center.scalarMultiply(centerK);
+            centerChange = new Vector3D(centerChange.getX(), centerChange.getY(), sb.min().getZ() - zDelete);
+            Camera camera = new Camera(
+                    //new Vector3D(-500, -1000, 1000).scalarMultiply(1.25),
+                    //sb.min().subtract((new Vector3D(0, -500, 3000).scalarMultiply(1))),
+                    centerChange,
+                    center.scalarMultiply(0.5),
+                    //sb.max(),
+                    //,
+                    0.6, 1, 1);
+            camera.translateLocal(new Vector3D(100, -100, -200));
+            scene.setCamera(camera);
+
+            /*
             // TODO: adjust camera, light source, etc. according to scene
             BoundingBox sb = scene.getBoundingBox();
             Vector3D position = sb.max();
             Vector3D reflected = new Vector3D(position.getX(), -position.getY(), position.getZ());
-            Vector3D center = new Vector3D(groundBox.min().subtract(groundBox.max()).scalarMultiply(0.5).toArray());
+            Vector3D center = new Vector3D(sb.min().add(sb.max()).scalarMultiply(0.5).toArray());
             scene.add(new PointLight(position.add(new Vector3D(0, 0, -140)),
                     new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
             scene.add(new PointLight(reflected.add(new Vector3D(0, 0, -210)),
                     new ColorEx(10000.0, 10000.0, 10000.0, 1.0)));
             // TODO adjusting
+
+            Vector3D p1 = new Vector3D(sb.max().getX(), sb.max().getY(), sb.max().getZ());
+            Vector3D p2 = new Vector3D(sb.max().getX(), sb.max().getY(), sb.min().getZ());
+            Vector3D p3 = new Vector3D(sb.max().getX(), sb.min().getY(), sb.max().getZ());
+            Vector3D p4 = new Vector3D(sb.max().getX(), sb.min().getY(), sb.min().getZ());
+            Vector3D p5 = new Vector3D(sb.min().getX(), sb.max().getY(), sb.max().getZ());
+            Vector3D p6 = new Vector3D(sb.min().getX(), sb.max().getY(), sb.min().getZ());
+            Vector3D p7 = new Vector3D(sb.min().getX(), sb.min().getY(), sb.max().getZ());
+            Vector3D p8 = new Vector3D(sb.min().getX(), sb.min().getY(), sb.min().getZ());
+
             Camera camera = new Camera(
                     //new Vector3D(-500, -1000, 1000).scalarMultiply(1.25),
-                    sb.min().subtract((new Vector3D(0, 0, 1000).scalarMultiply(1))),
+
+                    p2.subtract((new Vector3D(0, 0, 1500).scalarMultiply(1))),
                     center,
                     //,
                     0.6, 1, 1);
             //camera.translateLocal(new Vector3D(100, -100, -200));
             scene.setCamera(camera);
 
+             */
+            System.err.println("sceneBox:" + scene.getBoundingBox().min() + " " + scene.getBoundingBox().max());
             {
                 //  createGround ------
 
                 PhongMaterial groundMaterial = new PhongMaterial(new Color(0.5, 0.5, 0.5, 1.0));
                 Square groundSquare = new Square(new PhongMaterialEx(groundMaterial));
-                Vector3D scaleV = new Vector3D(groundBox.max().subtract(groundBox.min()).toArray());
-                double scale = Math.max(scaleV.getX(), scaleV.getY()) * 2.0;
+                BoundingBox groundBox = new BoundingBox();
+
+                groundBox.set(groundSquare);
+                System.err.println("groundBox:" + groundBox.min() + " " + groundBox.max());
+
+                Vector3D scaleV = new Vector3D(sb.max().subtract(sb.min()).toArray());
+                double scale = Math.max(scaleV.getX(), scaleV.getY()) * 1000.0;
+                System.err.println("scaleV:" + scaleV);
+                System.err.println("scale:" + scale);
                 groundSquare.scaleX(scale);
                 groundSquare.scaleY(scale);
 
-                center = new Vector3D(center.getX(), center.getY(), groundBox.min().getZ());
+                groundBox.set(groundSquare);
+                System.err.println("groundBoxScale:" + groundBox.min() + " " + groundBox.max());
+
+
+                center = new Vector3D(-4000, 0 * center.getY(), -4 * center.getZ());
                 groundSquare.translate(center);
+
+                groundBox.set(groundSquare);
+                System.err.println("groundBoxTranslate:" + groundBox.min() + " " + groundBox.max());
                 scene.add(groundSquare);
                 //  createGround ------
             }
+            System.err.println("AFTER:" + scene.getBoundingBox().min() + " " + scene.getBoundingBox().max());
 
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Load Model Results");
@@ -176,11 +230,14 @@ public class RenderController {
                             //System.err.println("(x:"+x+",y:"+y+"):"+
                             //        image.getPixelReader().getColor(x, y)
                             //                .toString());
+                            /*
                             if (!image.getPixelReader().getColor(x, y)
                                     .toString().equals("0x000000ff"))
                                 System.err.println("NONONONONONONONONONONONONONONONONO\n"
                                         + "(x:" + x + ",y:" + y + "):" +
                                         image.getPixelReader().getColor(x, y).toString());
+
+                        */
                         }
                     }
                     try {
