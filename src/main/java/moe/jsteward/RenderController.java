@@ -17,6 +17,7 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -92,9 +93,23 @@ public class RenderController {
                     }
                 });
             }
-            //scene.add(
-            //        (new Cube())
-            //);
+
+            PhongMaterial geoMaterial = new PhongMaterial(new Color(1.0, 1.0, 1.0, 1.0));
+            PhongMaterial cubeMaterial = new PhongMaterial(new Color(1.0, 0.0, 0.0, 1.0));
+            Cube geo = new Cube(new PhongMaterialEx(geoMaterial));
+            geo.scaleX(10);
+            geo.scaleY(10);
+            geo.scaleZ(10);
+            scene.add(geo);
+
+            Cube tmp = new Cube(new PhongMaterialEx(geoMaterial));
+            tmp.translate(new Vector3D(1.5, -1.5, 0.0));
+            scene.add(tmp);
+
+            Cube tmp2 = new Cube(new PhongMaterialEx(geoMaterial));
+            tmp2.translate(new Vector3D(2, 1, -4));
+            scene.add(tmp2);
+
             // TODO: adjust camera, light source, etc. according to scene
             BoundingBox sb = scene.getBoundingBox();
             Vector3D position = sb.max();
@@ -109,6 +124,22 @@ public class RenderController {
                     new Vector3D(500, 0, 0), 0.6, 1, 1);
             camera.translateLocal(new Vector3D(100, -100, -200));
             scene.setCamera(camera);
+
+            {
+                //  createGround ------
+                BoundingBox groundBox = scene.getBoundingBox();
+                PhongMaterial groundMaterial = new PhongMaterial(new Color(0.5, 0.5, 0.5, 1.0));
+                Square groundSquare = new Square(new PhongMaterialEx(groundMaterial));
+                Vector3D scaleV = new Vector3D(groundBox.max().subtract(groundBox.min()).toArray());
+                double scale = Math.max(scaleV.getX(), scaleV.getY()) * 2.0;
+                groundSquare.scaleX(scale);
+                groundSquare.scaleY(scale);
+                Vector3D center = new Vector3D(groundBox.min().subtract(groundBox.max()).scalarMultiply(0.5).toArray());
+                center = new Vector3D(center.getX(), center.getY(), groundBox.min().getZ());
+                groundSquare.translate(center);
+                scene.add(groundSquare);
+                //  createGround ------
+            }
 
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("Load Model Results");

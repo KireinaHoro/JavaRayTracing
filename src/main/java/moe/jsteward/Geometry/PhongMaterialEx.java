@@ -3,7 +3,7 @@ package moe.jsteward.Geometry;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 
-class PhongMaterialEx extends PhongMaterial {
+public class PhongMaterialEx extends PhongMaterial {
     private Color emissiveColor;
 
     void setEmissiveColor(Color _emissiveColor) {
@@ -14,7 +14,7 @@ class PhongMaterialEx extends PhongMaterial {
         return emissiveColor;
     }
 
-    PhongMaterialEx(PhongMaterial material) {
+    public PhongMaterialEx(PhongMaterial material) {
         super();
         this.setBumpMap(material.getBumpMap());
         this.setDiffuseColor(material.getDiffuseColor());

@@ -3,7 +3,7 @@ package moe.jsteward.Geometry;
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-class Cube extends Geometry {
+public class Cube extends Geometry {
 
     //protected Square m_squeare[] = new Square[6];
     /*
